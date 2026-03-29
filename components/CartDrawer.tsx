@@ -40,7 +40,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
     const handleCheckoutClick = () => {
         let hasError = false;
-        if (!phone || phone.length < 10) {
+        if (phone && phone.replace(/\D/g, '').length < 7) {
             setPhoneError(true);
             hasError = true;
         } else {
@@ -112,7 +112,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                                         <div className="font-bold text-gray-900 text-sm truncate">{course.title}</div>
                                     </div>
                                     <div className="text-right shrink-0 flex items-center gap-2">
-                                        <span className="font-display font-bold text-gray-900">₹{course.price}</span>
+                                        <span className="font-display font-bold text-gray-900">${course.price}</span>
                                         <button
                                             onClick={() => onRemove(course.id)}
                                             aria-label={`Remove ${course.title}`}
@@ -136,10 +136,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                                     <span className="text-xs font-bold uppercase tracking-widest text-brand-accent">Best Deal</span>
                                 </div>
                                 <div className="font-display font-bold text-base mb-1">
-                                    Get all 12 courses for ₹{BUNDLE_PRICE}
+                                    Get all 12 courses for ${BUNDLE_PRICE} USD
                                 </div>
                                 <div className="text-gray-400 text-[10px] mb-3 leading-tight">
-                                    Save ₹{(COURSES.length * 199 - BUNDLE_PRICE).toLocaleString()} vs buying individually
+                                    Save ${(COURSES.length * 199 - BUNDLE_PRICE).toLocaleString()} vs buying individually
                                 </div>
                                 <button
                                     onClick={onAddAll}
@@ -160,7 +160,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                                 All 12 courses added!
                             </div>
                             <div className="text-green-600 text-xs">
-                                Bundle discount applied: ₹{savings.toLocaleString()} saved
+                                Bundle discount applied: ${savings.toLocaleString()} saved
                             </div>
                         </div>
                     )}
@@ -180,20 +180,20 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                             {/* Phone Input */}
                             <div>
                                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 px-1">
-                                    Phone Number
+                                    Phone Number (optional)
                                 </label>
                                 <div className="relative">
                                     <Phone size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                                    <span className="absolute left-9 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xs">+91</span>
+                                    <span className="absolute left-9 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xs">+</span>
                                     <input
                                         type="tel"
-                                        placeholder="10-digit number"
+                                        placeholder="Country code + number"
                                         value={phone}
-                                        onChange={(e) => { setPhone(e.target.value.replace(/\D/g, '').slice(0, 10)); setPhoneError(false); }}
+                                        onChange={(e) => { setPhone(e.target.value.replace(/[^\d+]/g, '').slice(0, 16)); setPhoneError(false); }}
                                         className={`w-full pl-16 pr-4 py-2.5 bg-gray-50 border ${phoneError ? 'border-red-500 bg-red-50' : 'border-gray-200'} rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all`}
                                     />
                                 </div>
-                                {phoneError && <p className="text-red-500 text-[10px] mt-1 px-1 font-bold">Enter a valid 10-digit number</p>}
+                                {phoneError && <p className="text-red-500 text-[10px] mt-1 px-1 font-bold">Enter a valid phone number</p>}
                             </div>
 
                             {/* Email Input */}
@@ -234,9 +234,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                             <span className="text-gray-500 text-sm font-medium">Total Payable</span>
                             <div className="text-right">
                                 {allAdded && (
-                                    <div className="text-xs text-gray-400 line-through">₹{subtotal.toLocaleString()}</div>
+                                    <div className="text-xs text-gray-400 line-through">${subtotal.toLocaleString()}</div>
                                 )}
-                                <div className="text-2xl font-display font-bold text-gray-900 tracking-tight">₹{finalTotal.toLocaleString()}</div>
+                                <div className="text-2xl font-display font-bold text-gray-900 tracking-tight">${finalTotal.toLocaleString()}</div>
                             </div>
                         </div>
                         <button
@@ -247,7 +247,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                             <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                         </button>
                         <p className="text-center text-[9px] text-gray-400 mt-3 font-medium">
-                            🔒 SSL Secured Payment • GST Invoice Available
+                            🔒 SSL Secured Payment • Instant Access Delivery
                         </p>
                     </div>
                 )}

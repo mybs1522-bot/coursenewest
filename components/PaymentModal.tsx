@@ -1,452 +1,525 @@
-import React, { useState, useEffect } from 'react';
-import { X, Lock, Check, ArrowRight, Loader2, ShieldCheck, PartyPopper, Star, Users, Zap, Timer, BookOpen, Gift, CheckCircle2 } from 'lucide-react';
-import { submitPhoneNumber } from '../services/mockBackend';
-import { openRazorpayCheckout } from '../services/razorpay';
-import { PRICING_PLANS, COURSES } from '../constants';
-import { Course } from '../types';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { X, Lock, Check, Loader2, Mail, ShieldCheck, AlertCircle, RefreshCcw, ArrowRight, Sparkles, Timer } from 'lucide-react';
 
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialCourse?: Course | null;
 }
 
-type Step = 'DETAILS' | 'PACKAGE_PREVIEW' | 'PLANS' | 'SUCCESS';
+declare global {
+  interface Window {
+    Stripe?: (key: string) => any;
+    paypal?: any;
+  }
+}
 
-export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, initialCourse }) => {
-  const [step, setStep] = useState<Step>('PACKAGE_PREVIEW');
-  const [selectedPlanId, setSelectedPlanId] = useState<string | null>('lifetime-basic');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  
-  // Animation State for Bundle
-  const [addedCount, setAddedCount] = useState(0);
-  
-  // Timer & User Count State
-  const [timeLeft, setTimeLeft] = useState({ h: 0, m: 0, s: 0 });
-  const [userCounts, setUserCounts] = useState({ 'lifetime-basic': 23754, 'lifetime-plus': 17200 });
+const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '';
+const DEFAULT_STRIPE_PUBLISHABLE_KEY = 'pk_live_51PRJCsGGsoQTkhyv6OrT4zvnaaB5Y0MSSkTXi0ytj33oygsfW3dcu6aOFa9q3dr2mXYTCJErnFQJcOcyuDAsQd4B00lIAdclbB';
+const EFFECTIVE_STRIPE_KEY = (STRIPE_PUBLISHABLE_KEY || DEFAULT_STRIPE_PUBLISHABLE_KEY).trim();
+const BACKEND_URL = (import.meta.env.VITE_STRIPE_BACKEND_URL || 'https://dhufnozehayzjlsmnvdl.supabase.co/functions/v1/stripe-create-payment-intent').trim();
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const PAYPAL_CLIENT_ID = 'AVC9JqvTUJ8ETT_-mn-mU2TEcduyzHywIfVXs36DwJGQquy0PZkNFPTqVXBg9ScOhgbTe_QHQ461J8ts';
 
-  // Reset state when modal opens
+type ViewState = 'FORM' | 'PROCESSING' | 'SUCCESS' | 'CONNECTION_ERROR';
+
+export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
+  const [viewState, setViewState] = useState<ViewState>('FORM');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [nameError, setNameError] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
+  const stripeRef = useRef<any>(null);
+  const elementsRef = useRef<any>(null);
+  const stripeInitialized = useRef(false);
+  const paypalInitialized = useRef(false);
+
   useEffect(() => {
     if (isOpen) {
-      setStep(initialCourse ? 'DETAILS' : 'PACKAGE_PREVIEW');
-      setError('');
+      resetModal();
     }
-  }, [isOpen, initialCourse]);
+  }, [isOpen]);
 
-  // Handle Bundle Animation - Resets every time we enter PACKAGE_PREVIEW
   useEffect(() => {
-    if (step === 'PACKAGE_PREVIEW' && isOpen) {
-      setAddedCount(0);
-      const interval = setInterval(() => {
-        setAddedCount(prev => {
-          if (prev >= COURSES.length) {
-            clearInterval(interval);
-            return prev;
+    if (isOpen && viewState === 'FORM' && !stripeInitialized.current) {
+      initializeStripeUI();
+    }
+  }, [isOpen, viewState]);
+
+  useEffect(() => {
+    if (isOpen && viewState === 'FORM' && !paypalInitialized.current) {
+      initializePayPal();
+    }
+  }, [isOpen, viewState]);
+
+  useEffect(() => {
+    if (!isOpen || viewState !== 'FORM') return;
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isOpen, viewState]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const resetModal = () => {
+    setViewState('FORM');
+    setName('');
+    setEmail('');
+    setNameError(false);
+    setEmailError(false);
+    setErrorMessage(null);
+    setTimeLeft(15 * 60);
+    stripeRef.current = null;
+    elementsRef.current = null;
+    stripeInitialized.current = false;
+    paypalInitialized.current = false;
+  };
+
+  const ensurePayPalLoaded = async (): Promise<void> => {
+    if (window.paypal) return;
+
+    const existingScript = document.querySelector('script[data-paypal-js="true"]') as HTMLScriptElement | null;
+    if (existingScript) {
+      await new Promise<void>((resolve, reject) => {
+        if (window.paypal) { resolve(); return; }
+        existingScript.addEventListener('load', () => resolve(), { once: true });
+        existingScript.addEventListener('error', () => reject(new Error('PayPal SDK failed to load')), { once: true });
+      });
+      return;
+    }
+
+    await new Promise<void>((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=USD`;
+      script.async = true;
+      script.dataset.paypalJs = 'true';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('PayPal SDK failed to load'));
+      document.head.appendChild(script);
+    });
+  };
+
+  const initializePayPal = async () => {
+    try {
+      await ensurePayPalLoaded();
+      if (!window.paypal) return;
+
+      const container = document.getElementById('paypal-button-container');
+      if (!container || paypalInitialized.current) return;
+
+      paypalInitialized.current = true;
+      container.innerHTML = '';
+
+      window.paypal.Buttons({
+        style: {
+          layout: 'horizontal',
+          color: 'blue',
+          shape: 'rect',
+          label: 'paypal',
+          height: 45,
+          tagline: false,
+        },
+        createOrder: (_data: any, actions: any) => {
+          return actions.order.create({
+            purchase_units: [{
+              description: 'Global Design Career Bundle - 12 Premium Courses',
+              amount: {
+                currency_code: 'USD',
+                value: '49.00',
+              },
+            }],
+          });
+        },
+        onApprove: async (_data: any, actions: any) => {
+          setViewState('PROCESSING');
+          try {
+            await actions.order.capture();
+            navigate('/thank-you');
+            onClose();
+          } catch (err) {
+            setErrorMessage('PayPal payment failed. Please try again.');
+            setViewState('FORM');
           }
-          return prev + 1;
-        });
-      }, 80); // Speed of adding courses (faster for snappier feel)
-      return () => clearInterval(interval);
+        },
+        onError: (err: any) => {
+          console.error('PayPal error:', err);
+          setErrorMessage('PayPal encountered an error. Please try card payment.');
+        },
+        onCancel: () => {
+          setErrorMessage('Payment cancelled. Try again when ready.');
+        },
+      }).render('#paypal-button-container');
+    } catch (err) {
+      console.error('PayPal init error:', err);
     }
-  }, [step, isOpen]);
+  };
 
-  // Sync Timer Logic
-  useEffect(() => {
-    const calculateTime = () => {
-      const DURATION = (2 * 60 * 60 * 1000) + (23 * 60 * 1000) + (49 * 1000);
-      const now = Date.now();
-      const remaining = DURATION - (now % DURATION);
+  const initializeStripeUI = async (retry = 0) => {
+    try {
+      if (!EFFECTIVE_STRIPE_KEY) {
+        throw new Error('Stripe publishable key is missing.');
+      }
 
-      const h = Math.floor((remaining / (1000 * 60 * 60)) % 24);
-      const m = Math.floor((remaining / (1000 * 60)) % 60);
-      const s = Math.floor((remaining / 1000) % 60);
+      await ensureStripeLoaded();
 
-      setTimeLeft({ h, m, s });
-    };
+      if (!window.Stripe) {
+        throw new Error('Stripe SDK did not load. Please check your connection and retry.');
+      }
 
-    const timerInterval = setInterval(calculateTime, 1000);
-    calculateTime();
+      stripeRef.current = window.Stripe(EFFECTIVE_STRIPE_KEY);
+      elementsRef.current = stripeRef.current.elements({
+        mode: 'payment',
+        amount: 4900,
+        currency: 'usd',
+      });
 
-    return () => clearInterval(timerInterval);
-  }, []);
+      const paymentElement = elementsRef.current.create('payment', {
+        layout: 'tabs',
+        fields: {
+          billingDetails: {
+            name: 'never',
+            email: 'never',
+            address: 'never',
+          },
+        },
+      });
 
-  // Live User Count Logic
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setUserCounts(prev => ({
-        'lifetime-basic': prev['lifetime-basic'] + (Math.random() > 0.5 ? 2 : 1),
-        'lifetime-plus': prev['lifetime-plus'] + (Math.random() > 0.5 ? 2 : 1)
-      }));
-    }, 1500);
+      const mountPoint = document.getElementById('stripe-element-mount');
+      if (!mountPoint) {
+        throw new Error('Could not initialize payment form. Please reopen checkout.');
+      }
 
-    return () => clearInterval(interval);
-  }, []);
+      paymentElement.mount('#stripe-element-mount');
+    } catch (err: any) {
+      if (retry < 2) {
+        setTimeout(() => initializeStripeUI(retry + 1), 350);
+        return;
+      }
+      setErrorMessage(err?.message || 'Failed to initialize card checkout.');
+      setViewState('CONNECTION_ERROR');
+    }
+  };
+
+  const ensureStripeLoaded = async (): Promise<void> => {
+    if (window.Stripe) {
+      return;
+    }
+
+    const existingScript = document.querySelector('script[data-stripe-js="true"]') as HTMLScriptElement | null;
+
+    if (existingScript) {
+      await new Promise<void>((resolve, reject) => {
+        if (window.Stripe) {
+          resolve();
+          return;
+        }
+
+        existingScript.addEventListener('load', () => resolve(), { once: true });
+        existingScript.addEventListener('error', () => reject(new Error('Unable to load Stripe SDK.')), { once: true });
+      });
+      return;
+    }
+
+    await new Promise<void>((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://js.stripe.com/v3/';
+      script.async = true;
+      script.defer = true;
+      script.dataset.stripeJs = 'true';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('Unable to load Stripe SDK.'));
+      document.head.appendChild(script);
+    });
+  };
+
+  const handleCardPay = async () => {
+    if (!name.trim()) {
+      setNameError(true);
+      setErrorMessage('Please enter your full name.');
+      return;
+    }
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError(true);
+      setErrorMessage('Enter a valid email to receive instant access.');
+      return;
+    }
+
+    if (!stripeRef.current || !elementsRef.current) {
+      setErrorMessage('Payment gateway is still loading. Please wait 2-3 seconds.');
+      return;
+    }
+
+    setViewState('PROCESSING');
+    setErrorMessage(null);
+
+    try {
+      const { error: submitError } = await elementsRef.current.submit();
+      if (submitError) {
+        setErrorMessage(submitError.message || 'Please check your payment details.');
+        setViewState('FORM');
+        return;
+      }
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      if (SUPABASE_ANON_KEY) {
+        headers.apikey = SUPABASE_ANON_KEY;
+        headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`;
+      }
+
+      const res = await fetch(BACKEND_URL, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          items: [{ id: 'global-design-bundle' }],
+          email,
+          name,
+          amount: 49,
+          currency: 'USD',
+        }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error: ${res.status}`);
+      }
+
+      const { clientSecret } = await res.json();
+
+      const result = await stripeRef.current.confirmPayment({
+        elements: elementsRef.current,
+        clientSecret,
+        confirmParams: {
+          return_url: window.location.origin,
+          receipt_email: email,
+          payment_method_data: {
+            billing_details: {
+              name: name,
+              email: email,
+              address: {
+                country: 'US', // Defaulting to US if hidden, Stripe requires a country for some methods
+              },
+            },
+          },
+        },
+        redirect: 'if_required',
+      });
+
+      if (result.error) {
+        setErrorMessage(result.error.message || 'Payment failed. Please try another card.');
+        setViewState('FORM');
+        return;
+      }
+
+      if (result.paymentIntent?.status === 'succeeded') {
+        navigate('/thank-you');
+        onClose();
+      } else {
+        setErrorMessage('Payment not completed. Please try again.');
+        setViewState('FORM');
+      }
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'An unexpected error occurred.');
+      setViewState('FORM');
+    }
+  };
 
   if (!isOpen) return null;
 
-  const handlePlanSelect = (id: string) => {
-    setSelectedPlanId(id);
-  };
-
-  const handleDetailsContinue = () => {
-    setStep('PACKAGE_PREVIEW');
-  };
-
-  const selectedPlan = PRICING_PLANS.find(p => p.id === selectedPlanId);
-  const formatTime = (val: number) => val.toString().padStart(2, '0');
-
-  const handleRazorpaySuccess = (paymentId: string) => {
-    setIsLoading(false);
-    setStep('SUCCESS');
-    console.log("Transaction ID:", paymentId);
-  };
-
-  const handleRazorpayFailure = (error: any) => {
-    setIsLoading(false);
-    setError('Payment cancelled or failed. Please try again.');
-  };
-
-  const handlePaymentStart = async () => {
-    setError('');
-    if (!selectedPlan) return;
-    setIsLoading(true);
-
-    try {
-      if (selectedPlan.price === '$49') {
-         await submitPhoneNumber('', selectedPlan.id);
-         window.location.href = 'https://www.avada.space/checkout';
-         return;
-      }
-      if (selectedPlan.price === '$99') {
-         await submitPhoneNumber('', selectedPlan.id);
-         window.location.href = 'https://www.avada.space/checkout-now';
-         return;
-      }
-      await submitPhoneNumber('', selectedPlan.id);
-      openRazorpayCheckout(selectedPlan, '', handleRazorpaySuccess, handleRazorpayFailure);
-    } catch (err) {
-      setError('Something went wrong. Please try again.');
-      setIsLoading(false);
-    }
-  };
-
-  const isBundleComplete = addedCount >= COURSES.length;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
-      />
+    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={onClose} />
 
-      {/* FIXED HEIGHT CONTAINER ON DESKTOP - Prevents full page scrolling, enabling inner scrolling */}
-      <div className="relative w-full max-w-5xl bg-white border border-gray-200 rounded-3xl shadow-2xl overflow-hidden animate-[fadeIn_0.3s_ease-out] flex flex-col md:flex-row h-full md:h-[650px] max-h-[90vh] text-gray-900">
-        
-        {/* Close Button */}
-        <button 
-          onClick={onClose}
-          className="absolute top-4 right-4 z-50 p-2 bg-white/80 rounded-full text-gray-600 hover:text-black hover:bg-white transition-colors shadow-sm"
-        >
-          <X size={20} />
-        </button>
+      <div className="relative w-full max-w-[940px] bg-white rounded-[24px] shadow-2xl overflow-hidden flex flex-col md:flex-row h-[90vh] md:h-[650px] animate-[fadeIn_0.3s_ease-out]">
+        <div className="hidden md:flex w-[40%] bg-gray-50 text-gray-900 p-10 flex-col justify-between relative overflow-hidden border-r border-gray-100">
+          <div className="absolute top-0 right-0 w-[360px] h-[360px] bg-blue-50/60 rounded-full blur-[90px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-        {/* Left Side: Course Visuals */}
-        <div className={`hidden md:flex md:w-1/3 bg-gray-900 p-8 flex-col justify-between relative overflow-hidden text-white`}>
-           <div className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay transition-all duration-500" 
-                style={{ backgroundImage: `url(${step === 'DETAILS' && initialCourse ? initialCourse.imageUrl : 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop'})` }} 
-           />
-           <div className="absolute inset-0 bg-gradient-to-b from-brand-primary/20 to-black/80"></div>
-           
-           <div className="relative z-10">
-             {step === 'DETAILS' && initialCourse ? (
-               <>
-                 <div className="text-brand-accent text-xs font-bold uppercase tracking-widest mb-2">{initialCourse.software}</div>
-                 <h2 className="text-3xl font-display font-bold leading-tight mb-4">{initialCourse.title}</h2>
-                 <div className="flex items-center gap-4 mb-4">
-                    <div className="flex items-center gap-1 text-yellow-400">
-                      <Star size={14} fill="currentColor" />
-                      <Star size={14} fill="currentColor" />
-                      <Star size={14} fill="currentColor" />
-                      <Star size={14} fill="currentColor" />
-                      <Star size={14} fill="currentColor" />
-                      <span className="text-white text-xs ml-2 font-bold">5.0</span>
-                    </div>
-                 </div>
-               </>
-             ) : (
-               <>
-                 <div className="flex items-center gap-2 text-brand-accent font-bold mb-4">
-                   <ShieldCheck size={20} /> Secure Checkout
-                 </div>
-                 <h2 className="text-3xl font-display font-bold leading-tight mb-4">
-                   Master Design.<br/>Build Future.
-                 </h2>
-               </>
-             )}
-             
-             <p className="text-gray-300 text-sm leading-relaxed font-light">
-                {step === 'DETAILS' && initialCourse 
-                  ? "Included in the Avada All-Access Pass. One subscription, 12 premium courses."
-                  : "Join thousands of architects and designers. Access the complete library and fast-track your career."}
-             </p>
-           </div>
-           
-           <div className="relative z-10 mt-auto">
-             <div className="text-xs uppercase tracking-widest text-gray-500 mb-3 font-bold">What's included</div>
-             <ul className="space-y-2">
-               <li className="flex items-center gap-2 text-sm text-gray-300"><Check size={14} className="text-brand-accent" /> 12+ Premium Courses</li>
-               <li className="flex items-center gap-2 text-sm text-gray-300"><Check size={14} className="text-brand-accent" /> Source Files Download</li>
-               <li className="flex items-center gap-2 text-sm text-gray-300"><Check size={14} className="text-brand-accent" /> ISO Certification</li>
-             </ul>
-           </div>
-        </div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-8 text-emerald-600 bg-emerald-50 w-fit px-3 py-1 rounded-full border border-emerald-100">
+              <ShieldCheck size={14} /> <span className="text-[10px] font-bold uppercase tracking-widest">Secure Global Checkout</span>
+            </div>
+            <h2 className="text-3xl font-display font-black leading-none mb-3 tracking-tight">Global Design <br />Career Bundle</h2>
+            <div className="text-sm font-medium text-gray-500 mb-8">Instant Access • Lifetime Ownership</div>
 
-        {/* Right Side: Content Area */}
-        <div className="w-full md:w-2/3 flex flex-col h-full bg-white relative">
-          
-          {/* SCROLLABLE CONTENT AREA */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8 pb-0">
+            <div className="flex items-baseline gap-3 mb-10">
+              <span className="text-6xl font-black text-gray-900 tracking-tighter">$49</span>
+              <span className="text-xl text-gray-600 line-through font-medium">$199</span>
+            </div>
 
-            {/* STEP 1: PACKAGE PREVIEW */}
-            {step === 'PACKAGE_PREVIEW' && (
-              <div className="flex flex-col h-full">
-                {/* Header Info */}
-                <div className="mb-4">
-                    {initialCourse && (
-                         <div className="flex items-center gap-2 mb-2">
-                            <button onClick={() => setStep('DETAILS')} className="text-gray-400 hover:text-black transition-colors p-1 -ml-1">
-                                <ArrowRight size={16} className="rotate-180" />
-                            </button>
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Back</span>
-                         </div>
-                    )}
-                    <h3 className="text-2xl font-bold font-display text-gray-900 mb-1">The Ultimate Architecture Bundle</h3>
-                    <p className="text-gray-500 text-sm">You're one step away. Get instant access to everything.</p>
+            <div className="space-y-4">
+              {[
+                'Instant access right after payment',
+                'Lifetime updates included',
+                'Project files + templates included',
+                '7-Day Refund Policy',
+              ].map((item, i) => (
+                <div key={i} className={`flex items-center gap-3 text-sm font-bold ${item.includes('Refund') ? 'text-gray-900 bg-gray-100/50 p-1.5 -ml-1.5 rounded-lg' : 'text-gray-600'}`}>
+                  <div className="w-5 h-5 rounded-full bg-white border border-gray-200 flex items-center justify-center text-brand-primary shadow-sm"><Check size={12} strokeWidth={4} /></div>
+                  {item}
                 </div>
-                
-                {/* Progress Section */}
-                <div className="mb-6">
-                    <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-xs font-bold text-gray-900 uppercase tracking-widest flex items-center gap-2">
-                            <BookOpen size={14} className="text-brand-primary"/> 
-                            {isBundleComplete ? '12 Premium Courses Included' : `Adding Courses: ${addedCount}/${COURSES.length}`}
-                        </h4>
-                        {!isBundleComplete && <Loader2 size={14} className="animate-spin text-brand-primary" />}
-                    </div>
-                    
-                    <div className="h-1.5 w-full bg-gray-100 rounded-full mb-4 overflow-hidden">
-                       <div 
-                          className="h-full bg-brand-primary transition-all duration-300 ease-out"
-                          style={{ width: `${(addedCount / COURSES.length) * 100}%` }}
-                       ></div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {COURSES.slice(0, addedCount).map((course, idx) => (
-                            <div 
-                                key={course.id} 
-                                className="flex items-center gap-3 text-sm text-gray-700 bg-gray-50 p-2 rounded-lg border border-gray-100 animate-[fadeIn_0.3s_ease-out]"
-                            >
-                                 <div className="w-8 h-8 rounded overflow-hidden shrink-0 bg-gray-200">
-                                     <img src={course.imageUrl} className="w-full h-full object-cover" alt={course.title} />
-                                 </div>
-                                 <div className="min-w-0 flex-1">
-                                    <div className="font-bold truncate text-xs sm:text-sm">{course.title}</div>
-                                 </div>
-                                 <CheckCircle2 size={14} className="ml-auto text-green-500 shrink-0" />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Freebies List (Conditional) */}
-                <div className={`mb-6 bg-brand-primary/5 p-4 rounded-xl border border-brand-primary/10 transition-all duration-700 ${isBundleComplete ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                     <h4 className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <Gift size={14} className="text-brand-primary"/> Exclusive Freebies
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
-                         {[
-                            "10,000+ Textures & 3D Models",
-                            "Software Installation Guides",
-                            "Portfolio Review Session",
-                            "Official Certification"
-                         ].map((item, i) => (
-                             <div key={i} className="flex items-center gap-2 text-xs sm:text-sm text-gray-800 font-medium">
-                                <div className="w-4 h-4 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary shrink-0">
-                                   <Check size={10} strokeWidth={3} />
-                                </div>
-                                {item}
-                             </div>
-                         ))}
-                    </div>
-                </div>
-              </div>
-            )}
-
-            {step === 'DETAILS' && initialCourse && (
-                <div className="flex flex-col min-h-full pb-8">
-                     <div className="md:hidden w-full h-48 -mt-6 -mx-6 mb-6 relative overflow-hidden">
-                       <img src={initialCourse.imageUrl} className="w-full h-full object-cover" alt={initialCourse.title} />
-                     </div>
-                     <div className="flex-1">
-                         <p className="text-lg text-gray-600 mb-6 font-medium leading-relaxed">{initialCourse.description}</p>
-                         
-                         <div className="mb-6 p-4 bg-red-50 border-l-4 border-brand-primary rounded-r-lg">
-                            <div className="flex items-center gap-2 mb-2 text-brand-primary font-bold text-sm uppercase tracking-wider">
-                              <Zap size={16} /> Workflow Impact
-                            </div>
-                            <p className="text-sm text-gray-700 italic">"{initialCourse.workflowImpact}"</p>
-                          </div>
-
-                          <div className="bg-gray-50 rounded-xl p-5 border border-gray-100 mb-6">
-                            <h4 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-widest border-b border-gray-200 pb-2">What you'll learn</h4>
-                            <ul className="space-y-3">
-                              {initialCourse.learningPoints && initialCourse.learningPoints.map((point, idx) => (
-                                <li key={idx} className="flex gap-3 text-sm text-gray-600">
-                                  <div className="mt-0.5 w-5 h-5 rounded-full bg-brand-primary/10 flex items-center justify-center shrink-0 text-brand-primary"><Check size={12} strokeWidth={3} /></div>
-                                  <span>{point}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                     </div>
-                     <div className="h-24 md:hidden"></div>
-                </div>
-            )}
-
-             {step === 'PLANS' && (
-                 <div className="pb-8">
-                    <div className="flex items-center gap-2 mb-1">
-                      <button onClick={() => setStep('PACKAGE_PREVIEW')} className="text-gray-400 hover:text-black mr-2 transition-colors">
-                          <ArrowRight size={20} className="rotate-180" />
-                      </button>
-                      <h3 className="text-2xl font-bold font-display text-gray-900">Select Plan</h3>
-                    </div>
-                    <p className="text-gray-500 text-sm mb-6">Start your journey today. Cancel anytime.</p>
-                    
-                    <div className="space-y-3 mb-8">
-                      {PRICING_PLANS.map((plan) => {
-                        const currentUsers = plan.id === 'lifetime-basic' ? userCounts['lifetime-basic'] : userCounts['lifetime-plus'];
-                        return (
-                          <div 
-                            key={plan.id}
-                            onClick={() => handlePlanSelect(plan.id)}
-                            className={`relative p-5 rounded-xl border-2 cursor-pointer transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between group gap-4 sm:gap-0 ${selectedPlanId === plan.id ? `bg-red-50 border-brand-primary shadow-lg` : 'bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50'}`}
-                          >
-                            {plan.label && (
-                              <div className={`absolute -top-3 right-4 px-3 py-1 text-[10px] font-bold uppercase rounded-full shadow-sm z-10 ${selectedPlanId === plan.id ? 'bg-brand-primary text-white' : 'bg-gray-200 text-gray-600'}`}>
-                                {plan.label}
-                              </div>
-                            )}
-                            <div className="flex items-center gap-4">
-                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedPlanId === plan.id ? 'border-brand-primary' : 'border-gray-300'}`}>
-                                {selectedPlanId === plan.id && <div className="w-2.5 h-2.5 rounded-full bg-brand-primary" />}
-                              </div>
-                              <div>
-                                <div className={`font-bold text-lg leading-tight ${selectedPlanId === plan.id ? 'text-brand-primary' : 'text-gray-900'}`}>{plan.duration}</div>
-                                <div className="text-xs text-gray-500 font-medium mb-1">{plan.period}</div>
-                                <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-medium bg-black/5 w-fit px-2 py-0.5 rounded-md">
-                                   <Users size={10} className="text-brand-primary" />
-                                   <span className="tabular-nums font-bold text-gray-700">{currentUsers.toLocaleString()}</span> users joined
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-right sm:text-right flex flex-row sm:flex-col justify-between items-center sm:items-end w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 sm:border-none">
-                              <div className="text-sm text-gray-400 sm:hidden">Total Price</div>
-                              <div>
-                                <div className="text-xl font-bold font-display text-gray-900">{plan.price}</div>
-                                <div className="text-[10px] text-gray-400 line-through">{plan.originalPrice || '---'}</div>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div className="h-24 md:hidden"></div>
-                 </div>
-             )}
-
-             {step === 'SUCCESS' && (
-                 <div className="h-full flex flex-col items-center justify-center text-center">
-                    <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center text-green-600 mb-6 shadow-sm"><PartyPopper size={40} /></div>
-                    <h3 className="text-3xl font-bold font-display mb-2 text-gray-900">You're In!</h3>
-                    <p className="text-gray-500 max-w-xs mb-8">Your subscription is active. Welcome to the Avada community.</p>
-                    <button onClick={onClose} className="w-full max-w-xs py-4 bg-gray-900 text-white font-bold rounded-xl hover:bg-black transition-colors">Start Learning Now</button>
-                 </div>
-             )}
+              ))}
+            </div>
           </div>
 
-          {/* FIXED FOOTER AREA - ALWAYS VISIBLE AT BOTTOM */}
-          
-          {step === 'PACKAGE_PREVIEW' && (
-             <div className="p-5 border-t border-gray-100 bg-white z-20 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-                 <div className="flex flex-col gap-3">
-                    {/* Timer */}
-                    <div className="flex justify-center">
-                        <div className="inline-flex items-center gap-2 bg-red-50 px-3 py-1 rounded-lg border border-red-100">
-                            <div className="flex items-center gap-1 text-brand-primary animate-pulse">
-                                <Timer size={14} />
-                            </div>
-                            <span className="text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wide">Discount ends in:</span>
-                            <div className="flex items-center gap-0.5 text-sm font-bold font-mono text-brand-primary">
-                                <span>{formatTime(timeLeft.h)}</span>
-                                <span>:</span>
-                                <span>{formatTime(timeLeft.m)}</span>
-                                <span>:</span>
-                                <span>{formatTime(timeLeft.s)}</span>
-                            </div>
-                        </div>
-                    </div>
+          <div className="relative z-10 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+            <div className="text-[11px] font-bold text-gray-900">Trusted by 23,000+ learners worldwide</div>
+            <div className="text-[10px] text-gray-500 uppercase tracking-wider">Designers • Architects • Freelancers</div>
+          </div>
+        </div>
 
-                    <button 
-                        onClick={() => setStep('PLANS')}
-                        className="w-full py-3.5 bg-brand-primary hover:bg-brand-primary/90 text-white font-bold rounded-xl transition-all shadow-glow flex items-center justify-center gap-2 group text-lg"
-                    >
-                        I Want This Package <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                    </button>
-                    <p className="text-center text-[10px] text-gray-400">100% Money-back guarantee. Cancel anytime.</p>
-                 </div>
-             </div>
-          )}
-          
-          {step === 'DETAILS' && (
-               <div className="p-5 border-t border-gray-100 bg-white z-20 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-                  <button 
-                    onClick={handleDetailsContinue}
-                    className="w-full py-3.5 bg-brand-primary hover:bg-brand-primary/90 text-white font-bold rounded-xl transition-all shadow-glow flex items-center justify-center gap-2 group"
-                  >
-                    Unlock All Courses <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                  </button>
-               </div>
-          )}
-
-          {step === 'PLANS' && (
-              <div className="p-5 border-t border-gray-100 bg-white z-20 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-                 {error && <p className="text-red-500 text-xs mb-3 text-center bg-red-50 p-2 rounded">{error}</p>}
-                
-                 <button 
-                    onClick={handlePaymentStart}
-                    disabled={isLoading}
-                    className="w-full py-3.5 bg-brand-primary hover:bg-brand-primary/90 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 group shadow-glow disabled:opacity-70 disabled:cursor-not-allowed"
-                 >
-                    {isLoading ? (
-                        <>
-                        <Loader2 className="animate-spin" size={20} />
-                        Processing...
-                        </>
-                    ) : (
-                        <>
-                        Proceed to Checkout <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                        </>
-                    )}
-                 </button>
-                 <div className="flex items-center justify-center gap-2 mt-2 text-[10px] text-gray-400">
-                     <Lock size={10} /> Secured Payment
-                 </div>
+        <div className="flex-1 bg-white flex flex-col relative h-full">
+          <div className="px-4 py-4 border-b border-gray-100 flex items-center justify-between shrink-0 z-20 bg-white">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Sparkles size={18} className="text-white" />
               </div>
-          )}
+              <div>
+                <h3 className="text-base font-bold text-gray-900">Secure Checkout</h3>
+                <p className="text-[11px] text-gray-500">One-time payment • Instant access</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-900 transition-colors"><X size={20} /></button>
+          </div>
 
+          <div className="flex-1 px-4 py-4 overflow-y-auto">
+            {viewState === 'CONNECTION_ERROR' && (
+              <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
+                <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-red-500"><AlertCircle size={24} /></div>
+                <div>
+                  <h4 className="text-lg font-bold text-gray-900">Checkout Unavailable</h4>
+                  <p className="text-sm text-gray-500 mt-1">Please retry in a moment.</p>
+                </div>
+                <button onClick={resetModal} className="px-5 py-2.5 bg-gray-900 text-white rounded-xl font-bold text-sm flex items-center gap-2">
+                  <RefreshCcw size={14} /> Retry
+                </button>
+              </div>
+            )}
+
+            {(viewState === 'FORM' || viewState === 'PROCESSING') && (
+              <div className="space-y-4">
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-4 text-white">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Complete Bundle</p>
+                      <p className="font-bold text-white text-sm">12 Premium Courses</p>
+                      <p className="text-[11px] text-gray-400 mt-0.5">Lifetime access • <span className="text-white font-black">7-Day Refund</span></p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-black text-white">$49</p>
+                      <p className="text-xs text-gray-500 line-through">$199</p>
+                    </div>
+                  </div>
+                  {timeLeft > 0 && (
+                    <div className="mt-3 pt-3 border-t border-gray-700 flex items-center justify-center gap-2 text-amber-400">
+                      <Timer size={14} />
+                      <span className="text-xs font-bold">Offer expires in {formatTime(timeLeft)}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Full Name</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Lock className={`h-4 w-4 ${nameError ? 'text-red-400' : 'text-gray-400'}`} />
+                      </div>
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => { setName(e.target.value); setNameError(false); setErrorMessage(null); }}
+                        placeholder="John Doe"
+                        className={`block w-full pl-9 pr-3 py-3 bg-gray-50 border text-sm font-medium rounded-xl transition-all focus:outline-none focus:bg-white ${nameError ? 'border-red-300 bg-red-50/50' : 'border-gray-200 focus:border-emerald-500'}`}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Email Address</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Mail className={`h-4 w-4 ${emailError ? 'text-red-400' : 'text-gray-400'}`} />
+                      </div>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => { setEmail(e.target.value); setEmailError(false); setErrorMessage(null); }}
+                        placeholder="you@example.com"
+                        className={`block w-full pl-9 pr-3 py-3 bg-gray-50 border text-sm font-medium rounded-xl transition-all focus:outline-none focus:bg-white ${emailError ? 'border-red-300 bg-red-50/50' : 'border-gray-200 focus:border-emerald-500'}`}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Lock size={10} className="text-gray-400" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Card details</span>
+                  </div>
+                  <div id="stripe-element-mount" className="bg-gray-50 rounded-xl border border-gray-200 p-1"></div>
+                </div>
+
+                {errorMessage && (
+                  <div className="p-3 bg-red-50 text-red-600 rounded-xl text-xs font-bold flex items-center gap-2 border border-red-100">
+                    <AlertCircle size={14} className="shrink-0" />
+                    {errorMessage}
+                  </div>
+                )}
+
+                <button
+                  onClick={handleCardPay}
+                  disabled={viewState === 'PROCESSING'}
+                  className="w-full py-4 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white rounded-xl font-black text-base shadow-lg shadow-emerald-500/30 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70"
+                >
+                  {viewState === 'PROCESSING' ? <Loader2 className="animate-spin" size={20} /> : <><span>Get Access Now</span> <ArrowRight size={18} /></>}
+                </button>
+
+                <div className="pt-3 border-t border-dashed border-gray-200">
+                  <p className="text-[10px] text-center text-gray-400 font-medium mb-3">Or pay with PayPal</p>
+                  <div id="paypal-button-container" className="min-h-[45px]"></div>
+                </div>
+              </div>
+            )}
+
+            {viewState === 'SUCCESS' && (
+              <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-6">
+                <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center shadow-xl shadow-emerald-500/30">
+                  <Check size={40} className="text-white" strokeWidth={3} />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black text-gray-900 mb-1">Payment Successful!</h3>
+                  <p className="text-gray-500 text-sm">Check your email for instant access.</p>
+                </div>
+                <button
+                  onClick={onClose}
+                  className="w-full py-3.5 bg-gray-900 text-white rounded-xl font-bold text-base hover:bg-black transition-all"
+                >
+                  Done
+                </button>
+              </div>
+            )}
+          </div>
+
+          {(viewState === 'FORM' || viewState === 'PROCESSING') && (
+            <div className="p-4 border-t border-gray-100 bg-white shrink-0 z-20">
+              <div className="flex items-center justify-center gap-4 text-[10px] text-gray-500 font-bold">
+                <span className="flex items-center gap-1"><ShieldCheck size={12} className="text-emerald-500" /> Secure</span>
+                <span className="flex items-center gap-1"><Lock size={12} className="text-blue-500" /> Encrypted</span>
+                <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-100 uppercase tracking-tighter">7-Day Refund</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

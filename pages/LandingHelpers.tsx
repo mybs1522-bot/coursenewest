@@ -4,16 +4,16 @@ import { ArrowRight, ShieldCheck, Zap, CheckCircle, Users, X } from 'lucide-reac
 export const getDriveUrl = (id: string) => `https://drive.google.com/thumbnail?id=${id}&sz=w1600`;
 
 export const RAW_JOINERS = [
-  { name: "Priya S.", city: "Mumbai", time: "2 min ago" },
-  { name: "Rahul V.", city: "Delhi", time: "5 min ago" },
-  { name: "Ananya G.", city: "Pune", time: "8 min ago" },
-  { name: "Vikram S.", city: "Jaipur", time: "12 min ago" },
-  { name: "Meera I.", city: "Chennai", time: "15 min ago" },
-  { name: "Aravind S.", city: "Bangalore", time: "18 min ago" },
-  { name: "Neha K.", city: "Lucknow", time: "22 min ago" },
-  { name: "Rohit M.", city: "Ahmedabad", time: "25 min ago" },
-  { name: "Simran P.", city: "Chandigarh", time: "30 min ago" },
-  { name: "Arjun D.", city: "Hyderabad", time: "33 min ago" },
+  { name: "Emma T.", city: "London", time: "2 min ago" },
+  { name: "Noah R.", city: "Toronto", time: "5 min ago" },
+  { name: "Luca M.", city: "Milan", time: "8 min ago" },
+  { name: "Sofia P.", city: "Madrid", time: "12 min ago" },
+  { name: "Mia L.", city: "Sydney", time: "15 min ago" },
+  { name: "Ethan B.", city: "Austin", time: "18 min ago" },
+  { name: "Ava K.", city: "Seoul", time: "22 min ago" },
+  { name: "Oliver W.", city: "Berlin", time: "25 min ago" },
+  { name: "Emily J.", city: "New York", time: "30 min ago" },
+  { name: "Liam C.", city: "Dubai", time: "33 min ago" },
 ];
 
 export const PROBLEM_POINTS = [
@@ -51,7 +51,7 @@ export const FEAR_STATS = [
 /* ─── LOGO ─── */
 export const Logo = () => (
   <div className="flex flex-col items-center text-center cursor-pointer group" onClick={() => window.location.href = '/'}>
-    <span className="font-display font-bold text-lg tracking-tight leading-none text-slate-900 whitespace-nowrap">Avada</span>
+    <span className="font-display font-bold text-lg tracking-tight leading-none text-slate-900 whitespace-nowrap">Global</span>
     <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-blue-600 whitespace-nowrap mt-1">Design</span>
   </div>
 );
@@ -81,7 +81,7 @@ export const CallToActionWidget = ({ timeLeft, onClick, headline, subtext }: { t
           <div className="flip-clock-group"><div className="flex gap-1"><FlipDigit value={s[0]} /><FlipDigit value={s[1]} /></div><span className="flip-clock-label">SEC</span></div>
         </div>
         <div className="mb-6">
-          <p className="text-red-400 font-semibold text-sm mt-2">Special Offer — Don't miss this ₹999 steal deal</p>
+          <p className="text-red-400 font-semibold text-sm mt-2">Special Offer — Don't miss this $49 USD flash deal</p>
         </div>
         <div className="w-full max-w-md mx-auto">
           <button onClick={onClick} className="cta-primary w-full text-white px-8 py-4 md:py-5 rounded-2xl transition-all duration-300 flex items-center justify-center gap-3 group hover:scale-[1.03] active:scale-[0.98] premium-stroke" style={{ background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)', boxShadow: '0 6px 20px -4px rgba(249,115,22,0.5), 0 12px 40px -8px rgba(234,88,12,0.3)', border: '1px solid rgba(255,255,255,0.15)' }}>
@@ -89,10 +89,10 @@ export const CallToActionWidget = ({ timeLeft, onClick, headline, subtext }: { t
             <ArrowRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
-        <div className="mt-4 flex items-center justify-center gap-4 md:gap-8 text-[9px] md:text-[11px] font-medium uppercase tracking-[0.15em] text-zinc-500">
-          <div className="flex items-center gap-1.5"><ShieldCheck size={14} className="text-emerald-500" /> 7-Day Money-Back</div>
+        <div className="mt-4 flex items-center justify-center gap-4 md:gap-8 text-[10px] md:text-[12px] font-bold uppercase tracking-[0.15em] text-zinc-400">
+          <div className="flex items-center gap-1.5 bg-emerald-500/10 px-2 py-1 rounded-md text-emerald-400 border border-emerald-500/20"><ShieldCheck size={14} /> 7-Day Refund</div>
           <div className="w-[1px] h-3 bg-zinc-700"></div>
-          <div className="flex items-center gap-1.5"><Zap size={14} className="text-blue-400" /> Instant Access</div>
+          <div className="flex items-center gap-1.5 text-blue-400"><Zap size={14} /> Instant Access</div>
           <div className="w-[1px] h-3 bg-zinc-700 hidden sm:block"></div>
           <div className="hidden sm:flex items-center gap-1.5"><Users size={14} className="text-blue-400" /> All Software Included Free</div>
         </div>
@@ -142,31 +142,31 @@ export const VALUE_STACK_ITEMS = [
 ];
 
 export const TESTIMONIALS_LANDING = [
-  { name: 'Priya P.', role: 'Freelance Designer', location: 'Mumbai, IN', content: 'I used to cry when V-Ray crashed. Literally. The support team is so incredibly kind and patient. Now I use AI so well that I feel completely secure in my career.' },
-  { name: 'Aravind S.', role: 'Senior Architect', location: 'Bangalore, IN', content: 'I feared AI would replace my studio. But Avada held my hand through the transition. We now use it to generate gorgeous concepts for clients in minutes.' },
-  { name: 'Meera I.', role: '3D Visualizer', location: 'Chennai, IN', content: 'The step-by-step guidance is amazing for beginners. Whenever my scene looks dark or weird, I just ask the support team. They are absolute lifesavers.' },
-  { name: 'Rahul V.', role: 'Architecture Student', location: 'Delhi, IN', content: 'I felt so behind in college because they still teach completely outdated methods. Within two weeks here, I gained the confidence to start taking well-paying projects.' },
-  { name: 'Ananya G.', role: 'Interior Designer', location: 'Pune, IN', content: 'To have someone to actually look at your screen and say "Oh, simply press this button" saves weeks of frustration. Best ₹999 I ever spent.' },
-  { name: 'Vikram S.', role: 'Landscape Architect', location: 'Jaipur, IN', content: 'The continuous support makes learning stress-free. D5 Render combined with AI generation is just magical. It took away all my anxiety about falling behind.' },
-  { name: 'Neha K.', role: 'Studio Owner', location: 'Lucknow, IN', content: 'My team of 4 now works with zero stress because we integrated AI the way Avada taught us. No more late nights before client meetings.' },
-  { name: 'Rohit M.', role: 'Freelance Visualizer', location: 'Ahmedabad, IN', content: 'I almost quit 3D entirely because it felt too overwhelming. The friendly support team here broke it down to be so simple. I owe them my entire successful freelance business.' },
-  { name: 'Simran P.', role: 'Design Student', location: 'Chandigarh, IN', content: 'Started from absolute zero. I didn\'t even know what SketchUp was. 15 days later, thanks to their constant hand-holding, my portfolio landed me a paid studio gig.' },
-  { name: 'Arjun D.', role: 'Architect & Educator', location: 'Hyderabad, IN', content: 'I teach at a university, and sadly, we don\'t provide this level of modern, practical support. I genuinely recommend this to all my anxious students to secure their futures.' },
+  { name: 'Emma T.', role: 'Freelance Designer', location: 'London, UK', content: 'I used to panic when V-Ray crashed. The support team is incredibly patient. Now I use AI confidently and feel secure in my career.' },
+  { name: 'Ethan B.', role: 'Senior Architect', location: 'Austin, USA', content: 'I feared AI would replace my studio. Global Design showed us how to use it for faster concepts and stronger client pitches.' },
+  { name: 'Sophia N.', role: '3D Visualizer', location: 'Toronto, CA', content: 'The step-by-step guidance is perfect for beginners. Whenever a render looks off, support helps quickly. Total lifesavers.' },
+  { name: 'Noah K.', role: 'Architecture Student', location: 'Seoul, KR', content: 'In just two weeks, I built enough confidence to start taking paid projects with polished visuals.' },
+  { name: 'Olivia M.', role: 'Interior Designer', location: 'Sydney, AU', content: 'Having someone review your workflow saves weeks of frustration. Best $49 I spent this year.' },
+  { name: 'Liam O.', role: 'Landscape Architect', location: 'Madrid, ES', content: 'D5 Render plus AI workflows removed all the stress from client revisions.' },
+  { name: 'Ava K.', role: 'Studio Owner', location: 'Berlin, DE', content: 'My team now works faster and more calmly after adopting this exact pipeline.' },
+  { name: 'Oliver W.', role: 'Freelance Visualizer', location: 'New York, USA', content: 'I almost quit 3D. This program made the learning process simple, practical, and profitable.' },
+  { name: 'Emily J.', role: 'Design Student', location: 'Dubai, UAE', content: 'Started from zero. In 15 days, I had portfolio pieces strong enough to land my first paid studio work.' },
+  { name: 'Luca M.', role: 'Architect & Educator', location: 'Milan, IT', content: 'I recommend this to students who want practical, modern workflows they can use immediately.' },
 ];
 
 export const FAQ_ITEMS_LANDING = [
   { question: "I'm terrified of AI taking my job. Will this help?", answer: "We completely understand that fear! AI is scary if you ignore it, but it's an incredible superpower when you master it. We will hold your hand and teach you exactly how to use AI as your personal assistant, making you brilliantly fast and completely irreplaceable." },
   { question: "I am a complete beginner and get overwhelmed easily. Is this for me?", answer: "Yes, this program was built exactly with you in mind. We know learning software can be intimidating. We start from the absolute basics ('how to click here') and our team is always a WhatsApp message away to hold your hand when you feel stuck." },
   { question: "Are you really going to help me, or is this just another course?", answer: "This is a true 24/7 support community. When your render looks weird or your software crashes, you don't have to figure it out alone. You reach out to us, and we patiently help you fix it. Your success is our personal mission." },
-  { question: "Is it really just ₹999? What's the catch?", answer: "No catch! We simply want to make high-quality, supportive design education accessible to everyone. It's a one-time payment of ₹999 for lifetime access to the courses and our 24/7 support team." },
+  { question: "Is it really just $49 USD? What's the catch?", answer: "No catch. We keep pricing simple so more creators can upgrade fast. It's a one-time payment of $49 USD for lifetime access." },
   { question: "Do I need to buy expensive software subscriptions?", answer: "Not at all. We will show you exactly how to easily access official free or student versions of the software. We want you earning safely, not spending unnecessarily on expensive licenses." },
-  { question: "What if I feel like it's not working for me?", answer: "We want this to be completely stress-free for you. If you join and feel it's not a comforting and productive fit, just email us within 7 days. We will refund your ₹999 immediately, no questions asked, and we'll still be rooting for you!" },
+  { question: "What if I feel like it's not working for me?", answer: "We want this to be risk-free. If you join and feel it's not a fit, email us within 7 days and we will refund your $49 immediately." },
   { question: "Can I access the training safely on my mobile?", answer: "Yes! All courses are hosted clearly online and work perfectly on any device — laptop, tablet, or phone. You can learn comfortably at your own pace anywhere." },
 ];
 
 export const INCOME_TIERS = [
-  { label: 'Single Render Charge', before: 'Struggling to ask ₹1000', after: 'Confidently quoting ₹5,000+', icon: '🖼️' },
-  { label: 'Interior Design Project', before: 'Rejected for poor 3D quality', after: 'Winning ₹80,000+ contracts', icon: '🏠' },
+  { label: 'Single Render Charge', before: 'Struggling to ask $20', after: 'Confidently quoting $120+', icon: '🖼️' },
+  { label: 'Interior Design Project', before: 'Rejected for poor 3D quality', after: 'Winning $1,000+ contracts', icon: '🏠' },
   { label: 'Time to Finish a Room', before: '3 Frustrating, Sleepless Nights', after: '2 Easy Hours with our AI Workflow', icon: '⏱️' },
   { label: 'Your Career Confidence', before: 'Constantly Anxious & Overwhelmed', after: 'Relaxed, In-Demand Professional', icon: '🌟' },
 ];

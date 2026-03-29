@@ -249,44 +249,44 @@ export const COURSE_CATEGORIES = [
   }
 ];
 
-export const BUNDLE_PRICE = 999;
-export const BUNDLE_ORIGINAL_PRICE = 11988; // 12 × 999
+export const BUNDLE_PRICE = 49;
+export const BUNDLE_ORIGINAL_PRICE = 199;
 
 export const TESTIMONIALS: Testimonial[] = [
   {
-    name: 'Aravind Sharma',
+    name: 'Ethan Brooks',
     role: 'Senior Architect',
-    location: 'Bangalore, India',
-    content: 'The Revit workflow section alone saved our firm countless hours. Undeniable value for Indian projects.'
+    location: 'Austin, USA',
+    content: 'The Revit workflow section alone saved our firm countless hours. The value at $49 is unreal.'
   },
   {
-    name: 'Meera Iyer',
+    name: 'Sophia Nguyen',
     role: '3D Visualizer',
-    location: 'Chennai, India',
-    content: 'V-Ray + 3ds Max combo is a game-changer. My clients in the real estate sector are blown away by the realism.'
+    location: 'Toronto, Canada',
+    content: 'V-Ray + 3ds Max combo is a game-changer. My real estate clients are blown away by the realism.'
   },
   {
-    name: 'Priya Patel',
+    name: 'Mia Carter',
     role: 'Freelance Designer',
-    location: 'Mumbai, India',
+    location: 'London, UK',
     content: 'Built my entire freelance portfolio using these courses. Now I charge 3x what I used to for luxury interiors.'
   },
   {
-    name: 'Rahul Varma',
+    name: 'Noah Kim',
     role: 'Architecture Student',
-    location: 'Delhi, India',
+    location: 'Seoul, South Korea',
     content: 'Landed my dream internship at a top firm because I was the only one who knew Enscape VR and AI Design.'
   },
   {
-    name: 'Ananya Gupta',
+    name: 'Olivia Martin',
     role: 'Interior Designer',
-    location: 'Pune, India',
-    content: 'I can now present 10 variations to clients in the time it used to take for one. Best ₹199 I ever spent.'
+    location: 'Sydney, Australia',
+    content: 'I can now present 10 variations to clients in the time it used to take for one. Best $49 I ever spent.'
   },
   {
-    name: 'Vikram Singh',
+    name: 'Liam Ortega',
     role: 'Landscape Architect',
-    location: 'Jaipur, India',
+    location: 'Madrid, Spain',
     content: 'D5 Render lets me make changes during client meetings. Blows them away every time. Highly recommended.'
   }
 ];
@@ -298,7 +298,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     question: "Can I buy individual courses or only the bundle?",
-    answer: "Both options are available! Each course is ₹199 individually, or get all 12 for just ₹999 — saving over ₹1,300. The bundle is by far the best deal."
+    answer: "The bundle is the best value: get all 12 courses for a one-time $49 USD with lifetime access."
   },
   {
     question: "Are project files included?",
@@ -310,6 +310,6 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     question: "Is there a refund policy?",
-    answer: "Yes, 100% money-back guarantee within 7 days if you're not satisfied. No questions asked."
+    answer: "Yes, 100% money-back refund policy within 7 days if you're not satisfied. No questions asked."
   }
 ];

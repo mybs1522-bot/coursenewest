@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Course } from '../types';
 import { COURSES, COURSE_CATEGORIES, BUNDLE_PRICE, TESTIMONIALS, FAQ_ITEMS } from '../constants';
-import { ChevronDown, Sparkles, ArrowRight, Timer, Star, CheckCircle2, Zap, Check, Download, Phone, Mail, Lock, Loader2, X, Eye } from 'lucide-react';
-import { openRazorpayCheckout } from '../services/razorpay';
+import { ChevronDown, Sparkles, ArrowRight, Timer, Star, CheckCircle2, Zap, Download, Eye } from 'lucide-react';
 import { CourseDetailModal } from '../components/CourseDetailModal';
 import { TextMarquee } from '../components/ui/text-marquee';
+import { PaymentModal } from '../components/PaymentModal';
 
 // Logo Component
 const Logo = () => (
@@ -13,12 +13,12 @@ const Logo = () => (
       <span className="font-display font-black text-lg tracking-tighter relative z-10">AV</span>
     </div>
     <div className="flex flex-col">
-      <span className="font-display font-bold text-lg tracking-[0.2em] leading-none text-gray-900">AVADA</span>
+      <span className="font-display font-bold text-lg tracking-[0.2em] leading-none text-gray-900">GLOBAL</span>
       <div className="w-full h-[1px] bg-gray-200 my-0.5"></div>
       <span className="text-[7px] font-bold uppercase tracking-widest text-gray-400 flex justify-between w-full leading-none">
         <span>DESIGN</span>
         <span>•</span>
-        <span className="text-brand-primary font-black">₹{BUNDLE_PRICE}</span>
+        <span className="text-brand-primary font-black">${BUNDLE_PRICE}</span>
       </span>
     </div>
   </div>
@@ -29,13 +29,6 @@ const CheckoutPage: React.FC = () => {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [timeLeft, setTimeLeft] = useState({ h: 2, m: 23, s: 49 });
   const [detailCourse, setDetailCourse] = useState<Course | null>(null);
-  const [paymentSuccess, setPaymentSuccess] = useState<string | null>(null);
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [phoneError, setPhoneError] = useState(false);
-  const [emailError, setEmailError] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [paymentError, setPaymentError] = useState('');
   const [highlightIndex, setHighlightIndex] = useState<number>(-1);
   const [mobileSlideIndex, setMobileSlideIndex] = useState(0);
 
@@ -92,38 +85,6 @@ const CheckoutPage: React.FC = () => {
   }, []);
 
   const formatTime = (val: number) => val.toString().padStart(2, '0');
-  const validateEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
-
-  const handlePayment = () => {
-    let hasError = false;
-    if (!phone || phone.length < 10) { setPhoneError(true); hasError = true; } else { setPhoneError(false); }
-    if (!email || !validateEmail(email)) { setEmailError(true); hasError = true; } else { setEmailError(false); }
-    if (hasError) return;
-
-    setIsLoading(true);
-    setPaymentError('');
-
-    openRazorpayCheckout({
-      amount: BUNDLE_PRICE,
-      courseIds: COURSES.map(c => c.id),
-      userPhone: phone,
-      userEmail: email,
-      onSuccess: (paymentId) => {
-        setIsLoading(false);
-        setPaymentSuccess(paymentId);
-        setShowPaymentModal(false);
-      },
-      onCancel: () => {
-        setIsLoading(false);
-        console.log('Payment cancelled by user');
-      },
-      onError: (err) => {
-        setIsLoading(false);
-        setPaymentError('Payment failed. Please try again or contact support.');
-        console.error('Razorpay Error:', err);
-      }
-    });
-  };
 
   const scrollToCourses = () => {
     document.getElementById('courses')?.scrollIntoView({ behavior: 'smooth' });
@@ -193,7 +154,7 @@ const CheckoutPage: React.FC = () => {
         <div className="container mx-auto flex items-center justify-center gap-4 sm:gap-8 text-sm">
           <div className="flex items-center gap-2 shrink-0">
             <Zap size={14} className="text-yellow-400 fill-yellow-400" />
-            <span className="text-xs sm:text-sm font-bold">All 12 courses for just <span className="text-brand-accent">₹{BUNDLE_PRICE}</span></span>
+            <span className="text-xs sm:text-sm font-bold">Global lifetime bundle now <span className="text-brand-accent">${BUNDLE_PRICE} USD</span></span>
           </div>
           <div className="w-px h-4 bg-gray-700 hidden sm:block"></div>
           <div className="flex items-center gap-2 shrink-0">
@@ -218,7 +179,7 @@ const CheckoutPage: React.FC = () => {
             className="flex items-center gap-2 bg-gray-900 text-white font-bold text-xs px-5 py-2.5 rounded-full hover:bg-black transition-colors"
           >
             <Download size={14} className="text-yellow-400" />
-            <span className="hidden sm:inline">Download All Courses —</span> ₹{BUNDLE_PRICE}
+            <span className="hidden sm:inline">Unlock Global Bundle —</span> ${BUNDLE_PRICE}
           </button>
         </div>
       </nav>
@@ -339,10 +300,10 @@ const CheckoutPage: React.FC = () => {
               className="mt-6 md:mt-8 inline-flex items-center gap-1.5 md:gap-3 px-5 md:px-10 py-3.5 md:py-5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl md:rounded-2xl font-bold text-[13px] md:text-lg shadow-xl shadow-blue-500/30 hover:shadow-blue-500/40 hover:scale-[1.02] transition-all group w-full sm:w-auto justify-center animate-shimmer border border-blue-400/50"
             >
               <Download size={16} className="md:w-5 md:h-5 shrink-0" />
-              <span className="whitespace-nowrap">Download All Courses — ₹{BUNDLE_PRICE}</span>
+              <span className="whitespace-nowrap">Instant Access for ${BUNDLE_PRICE} USD</span>
               <ArrowRight size={16} className="md:w-[18px] md:h-[18px] group-hover:translate-x-1 transition-transform shrink-0" />
             </button>
-            <p className="mt-4 text-xs md:text-sm text-gray-500 font-medium max-w-[280px] md:max-w-none mx-auto leading-relaxed">Lifetime access • All software included free • 7-day money-back guarantee</p>
+            <p className="mt-4 text-xs md:text-sm text-gray-900 font-black max-w-[280px] md:max-w-none mx-auto leading-relaxed bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 inline-block">Lifetime access • All software included free • 7-Day Refund Policy</p>
           </div>
         </section>
 
@@ -382,10 +343,10 @@ const CheckoutPage: React.FC = () => {
                     Best Value Deal
                   </div>
                   <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-3">
-                    All {COURSES.length} Courses <span className="text-brand-accent">₹{BUNDLE_PRICE}</span>
+                    All {COURSES.length} Courses <span className="text-brand-accent">${BUNDLE_PRICE} USD</span>
                   </h2>
-                  <p className="text-gray-400 text-sm">
-                    Lifetime access to every course. Free software included. 7-day money-back guarantee.
+                  <p className="text-gray-900 font-black text-sm bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 inline-block mt-1">
+                    Lifetime access to every course. Free software included. 7-Day Refund Policy.
                   </p>
                 </div>
                 <button
@@ -393,7 +354,7 @@ const CheckoutPage: React.FC = () => {
                   className="px-5 py-4 md:px-10 md:py-5 bg-brand-primary text-white font-bold text-sm md:text-lg rounded-xl md:rounded-2xl shadow-glow hover:shadow-glow-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2 md:gap-3 group shrink-0 w-full sm:w-auto animate-shimmer border border-blue-400/30"
                 >
                   <Download size={16} className="md:w-5 md:h-5 shrink-0" />
-                  <span className="whitespace-nowrap">Download All Courses</span>
+                  <span className="whitespace-nowrap">Grab Instant Access Now</span>
                   <ArrowRight size={16} className="md:w-5 md:h-5 group-hover:translate-x-1 transition-transform shrink-0" />
                 </button>
               </div>
@@ -461,7 +422,7 @@ const CheckoutPage: React.FC = () => {
       <footer className="border-t border-gray-100 bg-white py-10 px-4 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Logo />
-          <p className="text-[10px] text-gray-400 tracking-wider">© 2026 Avada Inc. All rights reserved.</p>
+          <p className="text-[10px] text-gray-400 tracking-wider">© 2026 Global Design Academy. All rights reserved.</p>
         </div>
       </footer>
 
@@ -479,15 +440,15 @@ const CheckoutPage: React.FC = () => {
             <div className="flex items-center gap-3">
               <div className="text-right hidden sm:block">
                 <div className="text-[10px] text-gray-400 uppercase tracking-widest leading-tight">Bundle Price</div>
-                <div className="text-lg font-display font-bold text-white leading-tight">₹{BUNDLE_PRICE}</div>
+                <div className="text-lg font-display font-bold text-white leading-tight">${BUNDLE_PRICE}</div>
               </div>
               <button
                 onClick={() => setShowPaymentModal(true)}
                 className="bg-brand-primary hover:bg-blue-700 text-white font-bold px-5 py-2 rounded-lg flex items-center gap-1.5 transition-all shadow-glow hover:shadow-glow-lg text-sm"
               >
-                <span className="sm:hidden font-display text-base">₹{BUNDLE_PRICE}</span>
+                <span className="sm:hidden font-display text-base">${BUNDLE_PRICE}</span>
                 <Download size={14} />
-                <span>Download All</span>
+                <span>Get Instant Access</span>
                 <ArrowRight size={14} />
               </button>
             </div>
@@ -495,117 +456,7 @@ const CheckoutPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ═══════ PAYMENT MODAL ═══════ */}
-      {showPaymentModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isLoading && setShowPaymentModal(false)} />
-          <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-[fadeIn_0.3s_ease-out]">
-            {/* Close */}
-            <button aria-label="Close payment modal" onClick={() => !isLoading && setShowPaymentModal(false)} className="absolute top-4 right-4 z-10 p-2 bg-gray-100 rounded-full text-gray-500 hover:text-black hover:bg-gray-200 transition-colors">
-              <X size={18} />
-            </button>
-
-            {/* Header */}
-            <div className="bg-gray-900 text-white p-6 pb-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-brand-primary/20 rounded-full blur-3xl -mr-16 -mt-16"></div>
-              <div className="relative z-10">
-                <div className="inline-flex items-center gap-2 text-yellow-400 text-xs font-bold uppercase tracking-widest mb-3">
-                  <Sparkles size={14} className="fill-yellow-400" />
-                  Complete Bundle
-                </div>
-                <h3 className="text-2xl font-display font-bold mb-2">All {COURSES.length} Courses</h3>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-display font-black">₹{BUNDLE_PRICE}</span>
-                  <span className="text-gray-400 text-sm line-through">₹11,988</span>
-                  <span className="bg-emerald-500/20 text-emerald-400 text-xs font-bold px-2 py-0.5 rounded-full">92% OFF</span>
-                </div>
-              </div>
-            </div>
-
-            {/* What's Included */}
-            <div className="p-6 pb-3">
-              <div className="grid grid-cols-2 gap-2 mb-4">
-                {["12 Premium Courses", "10,000+ Textures", "Software Guides", "Official Certificate", "24/7 Team Support", "Lifetime Access"].map((item, i) => (
-                  <div key={i} className="flex items-center gap-2 text-xs text-gray-700 font-medium">
-                    <CheckCircle2 size={12} className="text-emerald-500 shrink-0" />
-                    {item}
-                  </div>
-                ))}
-              </div>
-
-              {/* Timer */}
-              <div className="bg-red-50 rounded-xl p-3 mb-4 flex items-center justify-between border border-red-100">
-                <div className="flex items-center gap-2">
-                  <Timer size={14} className="text-brand-primary animate-pulse" />
-                  <span className="text-xs font-bold text-gray-900">Offer ends in:</span>
-                </div>
-                <div className="flex items-center gap-0.5 font-display font-bold text-sm tabular-nums text-brand-primary bg-white px-2.5 py-1 rounded-md border border-red-100 shadow-sm">
-                  <span>{formatTime(timeLeft.h)}</span>
-                  <span className="text-gray-400">:</span>
-                  <span>{formatTime(timeLeft.m)}</span>
-                  <span className="text-gray-400">:</span>
-                  <span>{formatTime(timeLeft.s)}</span>
-                </div>
-              </div>
-
-              {/* Contact Inputs */}
-              <div className="space-y-3 mb-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 px-1">Phone Number</label>
-                  <div className="relative">
-                    <Phone size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <span className="absolute left-9 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xs">+91</span>
-                    <input
-                      type="tel"
-                      placeholder="10-digit number"
-                      value={phone}
-                      onChange={(e) => { setPhone(e.target.value.replace(/\D/g, '').slice(0, 10)); setPhoneError(false); }}
-                      className={`w-full pl-16 pr-4 py-2.5 bg-gray-50 border ${phoneError ? 'border-red-500 bg-red-50' : 'border-gray-200'} rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all`}
-                    />
-                  </div>
-                  {phoneError && <p className="text-red-500 text-[10px] mt-1 px-1 font-bold">Enter a valid 10-digit number</p>}
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 px-1">Email Address</label>
-                  <div className="relative">
-                    <Mail size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="email"
-                      placeholder="your@email.com"
-                      value={email}
-                      onChange={(e) => { setEmail(e.target.value); setEmailError(false); }}
-                      className={`w-full pl-10 pr-4 py-2.5 bg-gray-50 border ${emailError ? 'border-red-500 bg-red-50' : 'border-gray-200'} rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all`}
-                    />
-                  </div>
-                  {emailError && <p className="text-red-500 text-[10px] mt-1 px-1 font-bold">Enter a valid email address</p>}
-                </div>
-              </div>
-
-              {paymentError && <p className="text-red-500 text-xs mb-3 text-center bg-red-50 p-2 rounded">{paymentError}</p>}
-
-              {/* Pay Button */}
-              <button
-                onClick={handlePayment}
-                disabled={isLoading}
-                className="w-full py-4 bg-brand-primary hover:bg-blue-700 text-white font-bold rounded-xl text-lg flex items-center justify-center gap-2 transition-all shadow-glow hover:shadow-glow-lg active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed group"
-              >
-                {isLoading ? (
-                  <><Loader2 className="animate-spin" size={20} /> Processing...</>
-                ) : (
-                  <>
-                    <Download size={18} />
-                    Pay ₹{BUNDLE_PRICE} & Download All
-                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                  </>
-                )}
-              </button>
-              <div className="flex items-center justify-center gap-2 mt-3 text-[10px] text-gray-400">
-                <Lock size={10} /> SSL Secured Payment • 7-Day Money-Back Guarantee
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <PaymentModal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} />
 
       {/* ═══════ COURSE DETAIL MODAL ═══════ */}
       <CourseDetailModal
@@ -616,61 +467,7 @@ const CheckoutPage: React.FC = () => {
         onToggleCart={() => {}}
       />
 
-      {/* ═══════ PAYMENT SUCCESS OVERLAY ═══════ */}
-      {
-        paymentSuccess && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-[fadeIn_0.5s_ease]">
-            <div className="bg-white rounded-[2rem] p-8 max-w-lg w-full text-center shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-gray-100 relative overflow-hidden max-h-[90vh] overflow-y-auto">
-              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 to-indigo-500"></div>
 
-              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-                <Check size={40} className="text-blue-600" strokeWidth={3} />
-              </div>
-
-              <h2 className="text-3xl font-display font-black text-gray-900 mb-2">Payment Successful!</h2>
-              <p className="text-gray-500 mb-6 leading-relaxed">
-                Your payment of <span className="font-bold text-gray-900">₹{BUNDLE_PRICE}</span> was received. Welcome to Avada!
-              </p>
-
-              <div className="bg-gray-50 rounded-2xl p-5 mb-6 text-left border border-gray-100">
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles size={16} className="text-brand-primary" />
-                  <h3 className="font-bold text-gray-900">Your Course Access Link:</h3>
-                </div>
-                <p className="text-sm text-gray-600 mb-3 leading-relaxed">
-                  Click the link below to access all your courses on Google Drive. <strong>Please bookmark or save this link securely.</strong>
-                </p>
-                <a
-                  href="https://drive.google.com/drive/folders/1CCyv9u82HiYI8jnyULISfBoGMcbcqd9U?usp=drive_link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-3 px-4 rounded-xl text-center border border-blue-200 transition-colors break-all text-xs sm:text-sm"
-                >
-                  Access Courses on Google Drive
-                </a>
-              </div>
-
-              <div className="bg-gray-50 rounded-2xl p-4 mb-8 text-left border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Receipt Number</div>
-                  <div className="font-mono text-xs text-gray-600 truncate">{paymentSuccess}</div>
-                </div>
-                <div className="sm:text-right w-full sm:w-auto p-3 bg-white rounded-lg border border-gray-100">
-                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Support / WhatsApp</div>
-                  <a href="https://wa.me/918545015333" target="_blank" rel="noopener noreferrer" className="font-bold text-green-600 hover:text-green-700">+91 8545015333</a>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setPaymentSuccess(null)}
-                className="w-full bg-gray-900 text-white font-bold py-4 rounded-xl hover:bg-black transition-all shadow-lg hover:shadow-xl active:scale-[0.98]"
-              >
-                Close & Start Learning
-              </button>
-            </div>
-          </div>
-        )
-      }
 
       {/* Bottom spacer */}
       <div className="h-14"></div>

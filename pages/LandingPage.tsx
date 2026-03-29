@@ -31,7 +31,7 @@ const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Logo />
           <div className="flex items-center gap-4">
-            <button onClick={openCheckout} className="hidden md:block text-white px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 transition-all premium-stroke" style={{ background: 'linear-gradient(135deg,#f97316,#ea580c)', boxShadow: '0 0 15px rgba(249,115,22,0.4)' }}>Join 50,000+ Students</button>
+            <button onClick={openCheckout} className="hidden md:block text-white px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 transition-all premium-stroke" style={{ background: 'linear-gradient(135deg,#f97316,#ea580c)', boxShadow: '0 0 15px rgba(249,115,22,0.4)' }}>Get Instant Global Access</button>
           </div>
         </div>
       </header>
@@ -91,7 +91,7 @@ const LandingPage: React.FC = () => {
                   Get All Courses & 24/7 Team Support <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
                 </button>
               </div>
-              <p className="text-xs text-slate-500 mb-10 font-bold">24/7 support from team, installation help to course doubts • Free Software Links Included • 7-Day Money-Back Guarantee</p>
+              <p className="text-xs text-slate-500 mb-10 font-bold bg-white/50 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 inline-block">24/7 support from team, installation help to course doubts • Free Software Links Included • <span className="text-slate-900 font-black">7-Day Refund Policy</span></p>
               
               {/* Hero Video */}
               <div className="w-full max-w-4xl mb-6 overflow-hidden rounded-2xl shadow-2xl" style={{ position: 'relative', paddingTop: '56.25%' }}>
@@ -132,8 +132,8 @@ const LandingPage: React.FC = () => {
               <div className="flex flex-col items-center justify-center bg-gradient-to-br from-orange-500 to-orange-600 text-white px-10 py-8 rounded-[24px] shadow-2xl shadow-orange-500/30 transform hover:scale-105 transition-all cursor-pointer group premium-stroke relative z-10 w-full md:w-auto" onClick={openCheckout}>
                 <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-90 mb-2">Offer This Week Only</p>
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="text-xl text-orange-200/70 line-through font-bold">₹2,999</span>
-                  <span className="text-5xl font-black tracking-tighter">₹999</span>
+                  <span className="text-xl text-orange-200/70 line-through font-bold">$199</span>
+                  <span className="text-5xl font-black tracking-tighter">$49</span>
                 </div>
                 <div className="h-0.5 w-12 bg-white/30 rounded-full mb-3"></div>
                 <p className="text-xs font-black bg-white/20 px-3 py-1 rounded-full uppercase tracking-wider">Join for 66% Off</p>
@@ -261,7 +261,7 @@ const LandingPage: React.FC = () => {
                   <li className="flex items-center gap-3"><CheckCircle size={18} className="text-orange-500 shrink-0" /><span className="text-slate-800">24/7 support from team, installation help to course doubts—whenever you're stuck, we're here.</span></li>
                 </ul>
                 <div className="mt-6 pt-6 border-t border-orange-100 flex items-center justify-between">
-                  <span className="text-slate-600 text-sm italic font-bold">A complete learning ecosystem for just ₹999.</span>
+                  <span className="text-slate-600 text-sm italic font-bold">A complete learning ecosystem for just $49 USD.</span>
                   <button onClick={openCheckout} className="text-orange-600 font-bold text-sm hover:text-orange-800 flex items-center gap-1 group">Join Our Community <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" /></button>
                 </div>
               </div>
