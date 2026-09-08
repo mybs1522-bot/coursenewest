@@ -18,8 +18,13 @@ declare global {
 const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '';
 const DEFAULT_STRIPE_PUBLISHABLE_KEY = 'pk_live_51PRJCsGGsoQTkhyv6OrT4zvnaaB5Y0MSSkTXi0ytj33oygsfW3dcu6aOFa9q3dr2mXYTCJErnFQJcOcyuDAsQd4B00lIAdclbB';
 const EFFECTIVE_STRIPE_KEY = (STRIPE_PUBLISHABLE_KEY || DEFAULT_STRIPE_PUBLISHABLE_KEY).trim();
-const BACKEND_URL = (import.meta.env.VITE_STRIPE_BACKEND_URL || 'https://dhufnozehayzjlsmnvdl.supabase.co/functions/v1/stripe-create-payment-intent').trim();
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+// Real Supabase project config
+const DEFAULT_SUPABASE_URL = 'https://aexrgtpxyzfxjecozstf.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFleHJndHB4eXpmeGplY296c3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyOTY0MjcsImV4cCI6MjA4Nzg3MjQyN30._ZSmh9iTP3etyGj5XrkEGJtRp9kR8z6jAmLOMesIvkg';
+
+const BACKEND_URL = (import.meta.env.VITE_STRIPE_BACKEND_URL || `${DEFAULT_SUPABASE_URL}/functions/v1/stripe-create-payment-intent`).trim();
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
 const PAYPAL_CLIENT_ID = 'AVC9JqvTUJ8ETT_-mn-mU2TEcduyzHywIfVXs36DwJGQquy0PZkNFPTqVXBg9ScOhgbTe_QHQ461J8ts';
 
 type ViewState = 'FORM' | 'PROCESSING' | 'SUCCESS' | 'CONNECTION_ERROR';
@@ -35,12 +40,15 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
   const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
   const stripeRef = useRef<any>(null);
   const elementsRef = useRef<any>(null);
+  const paymentElementRef = useRef<any>(null);
   const stripeInitialized = useRef(false);
   const paypalInitialized = useRef(false);
 
   useEffect(() => {
     if (isOpen) {
       resetModal();
+    } else {
+      cleanupElements();
     }
   }, [isOpen]);
 
@@ -70,6 +78,20 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const cleanupElements = () => {
+    if (paymentElementRef.current) {
+      try {
+        paymentElementRef.current.unmount();
+        paymentElementRef.current.destroy();
+      } catch (e) {
+        // ignore
+      }
+      paymentElementRef.current = null;
+    }
+    const mountPoint = document.getElementById('stripe-element-mount');
+    if (mountPoint) mountPoint.innerHTML = '';
+  };
+
   const resetModal = () => {
     setViewState('FORM');
     setName('');
@@ -78,6 +100,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
     setEmailError(false);
     setErrorMessage(null);
     setTimeLeft(15 * 60);
+    cleanupElements();
     stripeRef.current = null;
     elementsRef.current = null;
     stripeInitialized.current = false;
@@ -143,6 +166,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
           setViewState('PROCESSING');
           try {
             await actions.order.capture();
+            trackPurchase({ value: 49, currency: 'USD', content_name: 'Avada 12-Course Architecture & Design Bundle' }, { name: name || email.split('@')[0], email });
             navigate('/thank-you');
             onClose();
           } catch (err) {
@@ -175,14 +199,42 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
         throw new Error('Stripe SDK did not load. Please check your connection and retry.');
       }
 
+      const mountPoint = document.getElementById('stripe-element-mount');
+      if (!mountPoint) {
+        if (retry < 3) {
+          setTimeout(() => initializeStripeUI(retry + 1), 250);
+          return;
+        }
+        throw new Error('Payment mount container not found.');
+      }
+
+      mountPoint.innerHTML = '';
+
       stripeRef.current = window.Stripe(EFFECTIVE_STRIPE_KEY);
       elementsRef.current = stripeRef.current.elements({
         mode: 'payment',
         amount: 4900,
         currency: 'usd',
+        appearance: {
+          theme: 'flat',
+          variables: {
+            colorPrimary: '#00D66F',
+            colorBackground: '#f8fafc',
+            colorText: '#0f172a',
+            colorDanger: '#ef4444',
+            fontFamily: 'Inter, system-ui, sans-serif',
+            borderRadius: '12px',
+          },
+          rules: {
+            '.Input': { border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', padding: '12px 14px' },
+            '.Input:focus': { border: '1.5px solid #00D66F', backgroundColor: '#ffffff', boxShadow: '0 0 0 2px rgba(0, 214, 111, 0.2)' },
+            '.Tab': { border: '1px solid #e2e8f0', borderRadius: '10px' },
+            '.Tab--selected': { borderColor: '#00D66F', backgroundColor: '#ecfdf5' },
+          },
+        },
       });
 
-      const paymentElement = elementsRef.current.create('payment', {
+      paymentElementRef.current = elementsRef.current.create('payment', {
         layout: 'tabs',
         fields: {
           billingDetails: {
@@ -193,12 +245,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
         },
       });
 
-      const mountPoint = document.getElementById('stripe-element-mount');
-      if (!mountPoint) {
-        throw new Error('Could not initialize payment form. Please reopen checkout.');
-      }
-
-      paymentElement.mount('#stripe-element-mount');
+      paymentElementRef.current.mount('#stripe-element-mount');
+      stripeInitialized.current = true;
     } catch (err: any) {
       if (retry < 2) {
         setTimeout(() => initializeStripeUI(retry + 1), 350);
@@ -297,7 +345,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `Server error: ${res.status}`);
+        throw new Error(errData.error || 'Card server is currently busy. Please pay securely with PayPal for instant 1-click access.');
       }
 
       const { clientSecret } = await res.json();

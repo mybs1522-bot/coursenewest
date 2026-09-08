@@ -48,28 +48,11 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-zinc-900 font-sans overflow-x-hidden selection:bg-zinc-200">
-      {/* ═══ TOP NAVBAR ═══ */}
-      <header className="sticky top-0 z-[60] bg-white/90 backdrop-blur-xl border-b border-zinc-200/80 px-4 sm:px-6 py-3.5">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <Logo />
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={openCheckout} 
-              className="bg-black hover:bg-zinc-800 text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-sm flex items-center gap-1.5 cursor-pointer border-2 border-[#00D66F]"
-            >
-              <span>Get All Courses</span>
-              <ArrowRight size={14} className="text-[#00D66F]" />
-            </button>
-          </div>
-        </div>
-      </header>
-
       <main className="py-6 sm:py-10">
         {/* ═══ 1. HERO ═══ */}
         <section className="max-w-5xl mx-auto px-4 sm:px-6 mb-10 text-center">
-          {/* Must Read Pill */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white border border-zinc-200 text-zinc-900 text-[11px] sm:text-xs font-bold uppercase tracking-wider mb-4 rounded-full shadow-xs">
-            <span className="bg-black text-white px-2 py-0.5 rounded-full text-[9px] font-bold">ESSENTIAL</span>
+          {/* Masterclass Pill (Single Line, No Essential) */}
+          <div className="inline-flex items-center px-4 py-1.5 bg-white border border-zinc-200 text-zinc-900 text-xs sm:text-sm font-bold uppercase tracking-wider mb-5 rounded-full shadow-xs whitespace-nowrap">
             <span>Architecture & Interior Design Masterclass</span>
           </div>
 
