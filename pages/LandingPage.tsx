@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Star, CheckCircle, CheckCircle2, X, ChevronDown, Sparkles, Download, ShieldCheck, Zap } from 'lucide-react';
+import { ArrowRight, Star, CheckCircle, CheckCircle2, X, ChevronDown, Sparkles, Download, ShieldCheck, Zap, Users } from 'lucide-react';
 import { WhatsAppButton } from '../components/WhatsAppButton';
 import {
   Logo, CallToActionWidget, SocialProofToast,
   PROBLEM_POINTS, TRANSFORMATION_STORIES, FEAR_STATS,
   VALUE_STACK_ITEMS, TESTIMONIALS_LANDING, FAQ_ITEMS_LANDING,
-  COURSES_LANDING, PAGE_PREVIEWS_ROW1, PAGE_PREVIEWS_ROW2
+  COURSES_LANDING, PAGE_PREVIEWS_ROW1, PAGE_PREVIEWS_ROW2,
+  DESIGN_MENTORS
 } from './LandingHelpers';
 import { trackViewContent, trackInitiateCheckout } from '../services/metaPixel';
 
@@ -547,8 +548,64 @@ const LandingPage: React.FC = () => {
             ))}
           </div>
 
-          <div className="max-w-3xl mx-auto px-4 mt-12 text-center">
-            <img src="/renders/mentors.png" alt="Industry Mentors & Creators" className="w-full h-auto drop-shadow-xl" />
+          {/* ═══ MEET YOUR DESIGN MENTORS ═══ */}
+          <div className="mt-16 pt-12 border-t border-slate-200/80">
+            <div className="mx-auto mb-10 flex max-w-3xl flex-col items-center px-4 text-center">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-md">
+                <Users size={24} />
+              </div>
+              <h2 className="mb-3 font-display font-black text-3xl sm:text-4xl text-slate-950 tracking-tight">
+                Meet Your Design Mentors
+              </h2>
+              <p className="max-w-2xl text-slate-600 text-sm sm:text-base font-medium leading-relaxed">
+                Industry professionals with years of real-world experience in architecture, interior design, and 3D visualization — guiding you every step of the way.
+              </p>
+            </div>
+
+            {/* Mentors Marquee */}
+            <div className="relative w-full overflow-hidden">
+              <div className="pointer-events-none absolute top-0 left-0 z-10 h-full w-16 sm:w-28 bg-gradient-to-r from-slate-50 to-transparent" />
+              <div className="pointer-events-none absolute top-0 right-0 z-10 h-full w-16 sm:w-28 bg-gradient-to-l from-slate-50 to-transparent" />
+              
+              <div className="flex gap-5 animate-scroll-left hover:pause w-max py-2">
+                {[...DESIGN_MENTORS, ...DESIGN_MENTORS].map((mentor, idx) => (
+                  <div key={`${mentor.name}-${idx}`} className="group flex w-52 sm:w-56 shrink-0 flex-col">
+                    <div className="relative overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1" style={{ height: '300px' }}>
+                      <img
+                        alt={mentor.name}
+                        className="h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0 group-hover:scale-105"
+                        src={mentor.image}
+                        loading="lazy"
+                      />
+                      <div className="absolute bottom-0 w-full rounded-b-2xl bg-white/95 backdrop-blur-sm p-3 border-t border-slate-100 text-left">
+                        <h3 className="font-bold text-slate-900 text-sm leading-tight">{mentor.name}</h3>
+                        <p className="text-orange-600 text-xs font-semibold mt-0.5">{mentor.role}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Featured Mentor Quote */}
+            <div className="mx-auto mt-12 max-w-2xl px-4 text-center">
+              <p className="mb-6 font-medium text-base sm:text-lg text-slate-900 leading-relaxed italic font-serif">
+                "The mentorship at Avada Design is unmatched. Our instructors don't just teach software — they guide you through the entire professional workflow, from concept to stunning final render."
+              </p>
+              <div className="flex flex-col items-center gap-2.5">
+                <div className="relative h-12 w-12 sm:h-14 sm:w-14 overflow-hidden rounded-full border-2 border-orange-500 shadow-md">
+                  <img
+                    alt="Sofia Reyes"
+                    className="h-full w-full object-cover"
+                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=face"
+                  />
+                </div>
+                <div className="text-center">
+                  <p className="font-bold text-slate-900 text-sm sm:text-base">Sofia Reyes</p>
+                  <p className="text-slate-500 text-xs font-medium">Interior Design Expert · Avada Design Faculty</p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
