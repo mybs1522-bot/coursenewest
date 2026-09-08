@@ -1,7 +1,6 @@
 const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
-const FROM_EMAIL = process.env.FROM_EMAIL || 'Avada Design <onboarding@resend.dev>';
+const FROM_EMAIL = process.env.FROM_EMAIL || 'Avada Design <access@avada.space>';
 const DRIVE_LINK = 'https://drive.google.com/drive/folders/1CCyv9u82HiYI8jnyULISfBoGMcbcqd9U?usp=drive_link';
-const WHATSAPP_NUMBER = '+91 91987 47810';
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
