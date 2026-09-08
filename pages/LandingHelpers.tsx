@@ -145,10 +145,10 @@ export const CallToActionWidget = ({ timeLeft, onClick, headline, subtext }: { t
         <div className="w-full max-w-md mx-auto">
           <button 
             onClick={onClick} 
-            className="w-full py-4 sm:py-4.5 bg-white hover:bg-zinc-200 active:scale-[0.99] text-black rounded-2xl font-black text-base uppercase tracking-wider transition-all flex items-center justify-center gap-3 cursor-pointer shadow-lg"
+            className="w-full py-4 sm:py-4.5 bg-black hover:bg-zinc-900 active:scale-[0.99] text-white rounded-2xl font-black text-base uppercase tracking-wider transition-all flex items-center justify-center gap-3 cursor-pointer shadow-lg border-2 border-[#00D66F]"
           >
             <span>Claim Instant Access ($49 USD)</span>
-            <ArrowRight size={18} />
+            <ArrowRight size={18} className="text-[#00D66F]" />
           </button>
         </div>
 

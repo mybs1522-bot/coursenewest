@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Star, CheckCircle, CheckCircle2, X, ChevronDown, Sparkles, Download, ShieldCheck, Zap, Users } from 'lucide-react';
-import { WhatsAppButton } from '../components/WhatsAppButton';
 import { PaymentModal } from '../components/PaymentModal';
 import {
   Logo, CallToActionWidget, SocialProofToast,
@@ -56,10 +55,10 @@ const LandingPage: React.FC = () => {
           <div className="flex items-center gap-3">
             <button 
               onClick={openCheckout} 
-              className="bg-black hover:bg-zinc-800 text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+              className="bg-black hover:bg-zinc-800 text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-sm flex items-center gap-1.5 cursor-pointer border-2 border-[#00D66F]"
             >
               <span>Get All Courses</span>
-              <ArrowRight size={14} />
+              <ArrowRight size={14} className="text-[#00D66F]" />
             </button>
           </div>
         </div>
@@ -128,11 +127,11 @@ const LandingPage: React.FC = () => {
 
             <button
               onClick={openCheckout}
-              className="w-full sm:w-auto px-10 md:px-14 py-4 md:py-4.5 bg-black hover:bg-zinc-800 text-white rounded-2xl font-black text-base md:text-lg border border-black shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all inline-flex items-center justify-center gap-3 cursor-pointer"
+              className="w-full sm:w-auto px-10 md:px-14 py-4 md:py-4.5 bg-black hover:bg-zinc-800 text-white rounded-2xl font-black text-base md:text-lg border-2 border-[#00D66F] shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all inline-flex items-center justify-center gap-3 cursor-pointer"
             >
-              <Download size={19} className="shrink-0" />
+              <Download size={19} className="shrink-0 text-[#00D66F]" />
               <span>Get All 12 Courses</span>
-              <ArrowRight size={19} />
+              <ArrowRight size={19} className="text-[#00D66F]" />
             </button>
 
             <p className="text-xs text-zinc-500 font-medium mt-1">
@@ -488,10 +487,10 @@ const LandingPage: React.FC = () => {
             <div className="p-5 text-center bg-white border-t border-zinc-200">
               <button
                 onClick={openCheckout}
-                className="w-full py-4 bg-black hover:bg-zinc-800 active:scale-[0.99] text-white rounded-2xl font-black text-base uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-4 bg-black hover:bg-zinc-800 active:scale-[0.99] text-white rounded-2xl font-black text-base uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer border-2 border-[#00D66F]"
               >
                 <span>Unlock All 12 Courses & Software Links ($49)</span>
-                <ArrowRight size={18} />
+                <ArrowRight size={18} className="text-[#00D66F]" />
               </button>
             </div>
           </div>
@@ -662,15 +661,14 @@ const LandingPage: React.FC = () => {
           </div>
           <button
             onClick={openCheckout}
-            className="bg-white hover:bg-zinc-200 text-black px-5 py-2 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+            className="bg-black hover:bg-zinc-900 text-white border-2 border-[#00D66F] px-5 py-2 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
           >
             <span>Get Access</span>
-            <ArrowRight size={15} />
+            <ArrowRight size={15} className="text-[#00D66F]" />
           </button>
         </div>
       </div>
 
-      <WhatsAppButton />
       <SocialProofToast />
       <PaymentModal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} />
     </div>
