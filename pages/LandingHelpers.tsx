@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, ShieldCheck, Zap, CheckCircle, Users, X } from 'lucide-react';
 
-export const getDriveUrl = (id: string) => `https://drive.google.com/thumbnail?id=${id}&sz=w1600`;
+export const getDriveUrl = (id: string) => `https://lh3.googleusercontent.com/d/${id}=w400-rw`;
 
 export const RAW_JOINERS = [
   { name: "Emma T.", city: "London", time: "2 min ago" },
@@ -23,8 +23,20 @@ export const PROBLEM_POINTS = [
 ];
 
 export const TRANSFORMATION_STORIES = [
-  { name: "Priya P.", role: "Freelance Designer", before: "Struggling alone with YouTube tutorials. Designs looked fake, took days, and clients wouldn't pay well without arguments.", after: "Joined our community. With 24/7 team support, she mastered V-Ray + AI. She now charges premium rates and finishes in a fraction of the time.", emoji: "✨" },
-  { name: "Rahul V.", role: "Architecture Student", before: "Terrified of AI taking his future job. Felt his college degree wasn't teaching practical, modern software skills.", after: "We held his hand through the workflow. He now uses AI to generate concepts and V-Ray for final polish. Just landed a massive internship.", emoji: "🎓" }
+  {
+    name: "Ngozi A.",
+    role: "Freelance Designer",
+    before: "Struggling alone with YouTube tutorials. Designs looked fake, took days, and clients wouldn't pay well without arguments.",
+    after: "Joined our community. With 24/7 team support, she mastered V-Ray + AI. She now charges premium rates and finishes in a fraction of the time.",
+    emoji: "✨"
+  },
+  {
+    name: "Emeka N.",
+    role: "Architecture Student",
+    before: "Terrified of AI taking his future job. Felt his university degree wasn't teaching practical, modern software skills.",
+    after: "We held his hand through the workflow. He now uses AI to generate concepts and V-Ray for final polish. Just landed a massive internship.",
+    emoji: "🎓"
+  }
 ];
 
 export const PAGE_PREVIEWS_ROW1 = [
@@ -50,9 +62,14 @@ export const FEAR_STATS = [
 
 /* ─── LOGO ─── */
 export const Logo = () => (
-  <div className="flex flex-col items-center text-center cursor-pointer group" onClick={() => window.location.href = '/'}>
-    <span className="font-display font-bold text-lg tracking-tight leading-none text-slate-900 whitespace-nowrap">Global</span>
-    <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-blue-600 whitespace-nowrap mt-1">Design</span>
+  <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => window.location.href = '/'}>
+    <div className="relative w-8 h-8 md:w-9 md:h-9 border-2 border-slate-950 flex items-center justify-center bg-yellow-400 font-display font-black text-base md:text-lg text-slate-950 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-xl">
+      AV
+    </div>
+    <div className="flex flex-col text-left">
+      <span className="font-display font-black text-base md:text-lg tracking-tight leading-none text-slate-950">Avada Design</span>
+      <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.2em] text-orange-600 mt-0.5">Architecture Academy</span>
+    </div>
   </div>
 );
 
@@ -66,35 +83,48 @@ export const CallToActionWidget = ({ timeLeft, onClick, headline, subtext }: { t
   const f = (v: number) => v.toString().padStart(2, '0');
   const h = f(timeLeft.h), m = f(timeLeft.m), s = f(timeLeft.s);
   return (
-    <div className="relative py-12 md:py-20 px-6 overflow-hidden">
-      <div className="absolute inset-0 bg-slate-900"></div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/5 blur-[150px] rounded-full pointer-events-none"></div>
+    <div className="relative py-10 md:py-16 px-5 md:px-8 overflow-hidden rounded-3xl bg-slate-950 text-white my-8 max-w-5xl mx-auto shadow-2xl border border-slate-800">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-orange-500/10 blur-[140px] rounded-full pointer-events-none"></div>
       <div className="max-w-2xl mx-auto relative z-10 text-center">
-        {headline && <h3 className="text-2xl md:text-3xl font-display font-bold text-white mb-2 tracking-tight">{headline}</h3>}
-        {subtext && <p className="text-zinc-400 text-sm mb-6">{subtext}</p>}
-        {!headline && <p className="text-zinc-500 text-xs font-mono uppercase tracking-widest mb-6">🚨 TIMER IS TICKING. DON'T REGRET MISSING THIS.</p>}
-        <div className="flex items-center justify-center gap-1 md:gap-2 mb-6">
-          <div className="flip-clock-group"><div className="flex gap-1"><FlipDigit value={h[0]} /><FlipDigit value={h[1]} /></div><span className="flip-clock-label">HRS</span></div>
-          <span className="text-xl md:text-3xl font-bold text-zinc-600 -mt-4">:</span>
-          <div className="flip-clock-group"><div className="flex gap-1"><FlipDigit value={m[0]} /><FlipDigit value={m[1]} /></div><span className="flip-clock-label">MIN</span></div>
-          <span className="text-xl md:text-3xl font-bold text-zinc-600 -mt-4">:</span>
-          <div className="flip-clock-group"><div className="flex gap-1"><FlipDigit value={s[0]} /><FlipDigit value={s[1]} /></div><span className="flip-clock-label">SEC</span></div>
+        <div className="inline-block bg-yellow-400 text-slate-950 font-black text-[10px] sm:text-xs uppercase tracking-widest px-3.5 py-1 rounded-full mb-3 shadow-sm">
+          🚨 STUDENTS WEEK DISCOUNT ($49 USD / 66% OFF)
         </div>
-        <div className="mb-6">
-          <p className="text-red-400 font-semibold text-sm mt-2">Special Offer — Don't miss this $49 USD flash deal</p>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-black text-white mb-2 tracking-tight">
+          {headline || "Start Learning Architecture & 3D Design Today"}
+        </h2>
+        <p className="text-xs sm:text-sm text-zinc-400 mb-6 max-w-lg mx-auto leading-relaxed font-medium">
+          {subtext || "Get instant access to all 12 courses, free software links, and 24/7 team guidance."}
+        </p>
+        
+        <div className="flex flex-col items-center justify-center gap-3 mb-6">
+          <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 px-5 py-2 rounded-2xl">
+            <span className="text-xs font-mono text-zinc-400 uppercase font-bold">Offer Ends In</span>
+            <div className="flex items-center gap-1 font-mono text-yellow-400 font-bold text-sm sm:text-base">
+              <span>{h}h</span>
+              <span>:</span>
+              <span>{m}m</span>
+              <span>:</span>
+              <span>{s}s</span>
+            </div>
+          </div>
         </div>
+
         <div className="w-full max-w-md mx-auto">
-          <button onClick={onClick} className="cta-primary w-full text-white px-8 py-4 md:py-5 rounded-2xl transition-all duration-300 flex items-center justify-center gap-3 group hover:scale-[1.03] active:scale-[0.98] premium-stroke" style={{ background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)', boxShadow: '0 6px 20px -4px rgba(249,115,22,0.5), 0 12px 40px -8px rgba(234,88,12,0.3)', border: '1px solid rgba(255,255,255,0.15)' }}>
-            <span className="text-lg md:text-xl font-display font-bold uppercase tracking-widest relative z-10">Claim Your High-Paying Career</span>
-            <ArrowRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
+          <button 
+            onClick={onClick} 
+            className="w-full py-4 sm:py-5 bg-gradient-to-r from-red-600 via-orange-600 to-red-600 text-white rounded-2xl font-black text-base sm:text-lg uppercase tracking-wider shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 border-2 border-slate-950 shadow-[4px_4px_0px_#000]"
+          >
+            <span>Claim Offer & Download ($49 USD)</span>
+            <ArrowRight size={20} />
           </button>
         </div>
-        <div className="mt-4 flex items-center justify-center gap-4 md:gap-8 text-[10px] md:text-[12px] font-bold uppercase tracking-[0.15em] text-zinc-400">
-          <div className="flex items-center gap-1.5 bg-emerald-500/10 px-2 py-1 rounded-md text-emerald-400 border border-emerald-500/20"><ShieldCheck size={14} /> 7-Day Refund</div>
-          <div className="w-[1px] h-3 bg-zinc-700"></div>
-          <div className="flex items-center gap-1.5 text-blue-400"><Zap size={14} /> Instant Access</div>
-          <div className="w-[1px] h-3 bg-zinc-700 hidden sm:block"></div>
-          <div className="hidden sm:flex items-center gap-1.5"><Users size={14} className="text-blue-400" /> All Software Included Free</div>
+
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 md:gap-4 text-[10px] sm:text-xs text-zinc-400 font-bold uppercase tracking-wider">
+          <span>🛡️ 7-Day 100% Money-Back Guarantee</span>
+          <span>•</span>
+          <span>⚡ Instant Access</span>
+          <span>•</span>
+          <span>💬 24/7 WhatsApp Support</span>
         </div>
       </div>
     </div>
@@ -127,41 +157,47 @@ export const SocialProofToast: React.FC = () => {
 
 /* ─── CONSTANTS ─── */
 export const VALUE_STACK_ITEMS = [
-  { name: 'AutoCAD Precision Drafting Course', value: 'Included' },
-  { name: 'SketchUp 3D Modeling Course', value: 'Included' },
-  { name: 'V-Ray Photo-Realism Masterclass', value: 'Included' },
-  { name: 'Lumion Cinematic Walkthroughs', value: 'Included' },
-  { name: 'D5 Real-Time Rendering', value: 'Included' },
-  { name: 'AI Design & Rendering Course', value: 'Included' },
+  { name: '1. AutoCAD Precision Drafting Course', value: 'Included ($199 Value)' },
+  { name: '2. BIM with Revit Architecture Course', value: 'Included ($199 Value)' },
+  { name: '3. SketchUp Pro 3D Modeling Masterclass', value: 'Included ($199 Value)' },
+  { name: '4. 3ds Max Advanced Luxury Interiors', value: 'Included ($199 Value)' },
+  { name: '5. V-Ray Photo-Realism Masterclass', value: 'Included ($199 Value)' },
+  { name: '6. Lumion Cinematic Walkthroughs', value: 'Included ($199 Value)' },
+  { name: '7. D5 Real-Time Rendering Masterclass', value: 'Included ($199 Value)' },
+  { name: '8. Enscape VR Architecture Course', value: 'Included ($199 Value)' },
+  { name: '9. AI Architecture (Midjourney) Masterclass', value: 'Included ($199 Value)' },
+  { name: '10. Generative Design (Stable Diffusion)', value: 'Included ($199 Value)' },
+  { name: '11. Unreal Engine 5 Interactive Design', value: 'Included ($199 Value)' },
+  { name: '12. Post Production & Photoshop Mastery', value: 'Included ($199 Value)' },
   { name: '10,000+ Premium Texture Library', value: 'Included' },
   { name: '2,000+ Drag-and-Drop 3D Models', value: 'Included' },
-  { name: 'Software Installation Hub', value: 'Included' },
-  { name: '24/7 Team Access & Portfolio Review', value: 'Included' },
-  { name: 'Freelancing Pricing Playbook', value: 'Included' },
-  { name: 'Certified Digital Diploma', value: 'Included' },
+  { name: 'Software Installation Hub & Direct Free Links', value: 'Included' },
+  { name: '24/7 Team Access & Screen Support', value: 'Included' },
+  { name: '3 Real Paid Freelance Projects', value: 'Included ($300 Value)' },
+  { name: 'Freelancing Pricing & Client Acquisition Playbook', value: 'Included' },
+  { name: 'Official Diploma Certificate Equivalent', value: 'Included' },
 ];
 
 export const TESTIMONIALS_LANDING = [
-  { name: 'Emma T.', role: 'Freelance Designer', location: 'London, UK', content: 'I used to panic when V-Ray crashed. The support team is incredibly patient. Now I use AI confidently and feel secure in my career.' },
-  { name: 'Ethan B.', role: 'Senior Architect', location: 'Austin, USA', content: 'I feared AI would replace my studio. Global Design showed us how to use it for faster concepts and stronger client pitches.' },
-  { name: 'Sophia N.', role: '3D Visualizer', location: 'Toronto, CA', content: 'The step-by-step guidance is perfect for beginners. Whenever a render looks off, support helps quickly. Total lifesavers.' },
-  { name: 'Noah K.', role: 'Architecture Student', location: 'Seoul, KR', content: 'In just two weeks, I built enough confidence to start taking paid projects with polished visuals.' },
-  { name: 'Olivia M.', role: 'Interior Designer', location: 'Sydney, AU', content: 'Having someone review your workflow saves weeks of frustration. Best $49 I spent this year.' },
-  { name: 'Liam O.', role: 'Landscape Architect', location: 'Madrid, ES', content: 'D5 Render plus AI workflows removed all the stress from client revisions.' },
-  { name: 'Ava K.', role: 'Studio Owner', location: 'Berlin, DE', content: 'My team now works faster and more calmly after adopting this exact pipeline.' },
+  { name: 'Ngozi A.', role: 'Freelance Designer', location: 'London, UK', content: 'I used to cry when V-Ray crashed. Literally. The support team is so incredibly kind and patient. Now I use AI so well that I feel completely secure in my career.' },
+  { name: 'Ethan B.', role: 'Senior Architect', location: 'Austin, USA', content: 'I feared AI would replace my studio. But Avada held my hand through the transition. We now use it to generate gorgeous concepts for clients in minutes.' },
+  { name: 'Sophia N.', role: '3D Visualizer', location: 'Toronto, CA', content: 'The step-by-step guidance is amazing for beginners. Whenever my scene looks dark or weird, I just ask the support team. They are absolute lifesavers.' },
+  { name: 'Emeka N.', role: 'Architecture Student', location: 'Seoul, KR', content: 'I felt so behind in university because they still teach completely outdated methods. Within two weeks here, I gained the confidence to start taking well-paying projects.' },
+  { name: 'Olivia M.', role: 'Interior Designer', location: 'Sydney, AU', content: 'To have someone to actually look at your screen and say "Oh, simply press this button" saves weeks of frustration. Best $49 I ever spent.' },
+  { name: 'Liam O.', role: 'Landscape Architect', location: 'Madrid, ES', content: 'The continuous support makes learning stress-free. D5 Render combined with AI generation is just magical. It took away all my anxiety about falling behind.' },
+  { name: 'Ava K.', role: 'Studio Owner', location: 'Berlin, DE', content: 'My studio workflow is now 10x faster. We pitch 10 options to clients in 1 hour.' },
   { name: 'Oliver W.', role: 'Freelance Visualizer', location: 'New York, USA', content: 'I almost quit 3D. This program made the learning process simple, practical, and profitable.' },
-  { name: 'Emily J.', role: 'Design Student', location: 'Dubai, UAE', content: 'Started from zero. In 15 days, I had portfolio pieces strong enough to land my first paid studio work.' },
-  { name: 'Luca M.', role: 'Architect & Educator', location: 'Milan, IT', content: 'I recommend this to students who want practical, modern workflows they can use immediately.' },
 ];
 
 export const FAQ_ITEMS_LANDING = [
+  { question: "I don't have a design degree. Can I really start an Interior Design career?", answer: "YES! 100%. Clients don't care about degrees — they care about stunning renders and fast delivery. We teach you the exact practical workflow (AutoCAD, SketchUp, V-Ray, Lumion & AI) so you can create client-ready portfolios and start taking paid jobs in just 15 to 30 days." },
   { question: "I'm terrified of AI taking my job. Will this help?", answer: "We completely understand that fear! AI is scary if you ignore it, but it's an incredible superpower when you master it. We will hold your hand and teach you exactly how to use AI as your personal assistant, making you brilliantly fast and completely irreplaceable." },
   { question: "I am a complete beginner and get overwhelmed easily. Is this for me?", answer: "Yes, this program was built exactly with you in mind. We know learning software can be intimidating. We start from the absolute basics ('how to click here') and our team is always a WhatsApp message away to hold your hand when you feel stuck." },
   { question: "Are you really going to help me, or is this just another course?", answer: "This is a true 24/7 support community. When your render looks weird or your software crashes, you don't have to figure it out alone. You reach out to us, and we patiently help you fix it. Your success is our personal mission." },
-  { question: "Is it really just $49 USD? What's the catch?", answer: "No catch. We keep pricing simple so more creators can upgrade fast. It's a one-time payment of $49 USD for lifetime access." },
-  { question: "Do I need to buy expensive software subscriptions?", answer: "Not at all. We will show you exactly how to easily access official free or student versions of the software. We want you earning safely, not spending unnecessarily on expensive licenses." },
-  { question: "What if I feel like it's not working for me?", answer: "We want this to be risk-free. If you join and feel it's not a fit, email us within 7 days and we will refund your $49 immediately." },
-  { question: "Can I access the training safely on my mobile?", answer: "Yes! All courses are hosted clearly online and work perfectly on any device — laptop, tablet, or phone. You can learn comfortably at your own pace anywhere." },
+  { question: "Is it really just $49 USD? What's the catch?", answer: "No catch. We keep pricing low so more creators can upgrade fast without breaking the bank. It's a one-time payment of $49 USD for lifetime access to all 12 courses, free software links, and 24/7 team support." },
+  { question: "Do I need to buy expensive software subscriptions?", answer: "Not at all. We will show you exactly how to easily access official free or student versions of all software. We want you earning safely, not spending thousands on expensive licenses." },
+  { question: "What if I feel like it's not working for me?", answer: "We want this to be 100% risk-free. If you join and feel it's not a fit, email us within 7 days and we will refund your $49 immediately, no questions asked." },
+  { question: "Can I access the training on my mobile and laptop?", answer: "Yes! All courses are hosted online and work perfectly on any device — laptop, desktop, tablet, or phone. You can learn comfortably at your own pace anywhere." },
 ];
 
 export const INCOME_TIERS = [
@@ -173,45 +209,87 @@ export const INCOME_TIERS = [
 
 export const COURSES_LANDING = [
   {
+    id: '5', title: 'V-Ray Photorealism', software: 'V-Ray', students: '48k',
+    description: 'Make your 3D models look like real photos with realistic sunlight and textures.',
+    imageUrl: 'https://lh3.googleusercontent.com/d/1aHEt_z78tYD_0Cn66DiduAnhwn-o8El8=w400-rw',
+    learningPoints: ['Set up realistic sunlight and night lighting', 'Make materials look like real wood and glass', 'Sell your design before it exists'],
+    workflowImpact: 'Sell your design before it exists.'
+  },
+  {
     id: '1', title: 'AutoCAD Mastery', software: 'AutoCAD', students: '42.5k',
-    description: 'Feeling slow and clunky drawing floor plans? We will patiently teach you the industry shortcuts so you can draft precision plans stress-free in half the time.',
-    imageUrl: 'https://lh3.googleusercontent.com/d/1fV5bz4JDugh8HxLMJ0fXu5K5sDj3qlSR',
-    learningPoints: ['Friendly, step-by-step drafting basics', 'Speed shortcuts that reduce your eye-strain', 'Clean detailing that builders will easily understand'],
-    workflowImpact: 'Stop dreading revisions. Make changes easily in seconds.'
+    description: 'Draw accurate 2D floor plans for houses and buildings 10x faster with shortcuts.',
+    imageUrl: 'https://lh3.googleusercontent.com/d/1fV5bz4JDugh8HxLMJ0fXu5K5sDj3qlSR=w400-rw',
+    learningPoints: ['Draw floor plans and furniture layouts easily', 'Print your drawings to scale for construction', 'Use shortcuts to draw 10x faster'],
+    workflowImpact: 'Create professional blueprints that contractors build from.'
   },
   {
-    id: '3', title: 'SketchUp 3D', software: 'SketchUp', students: '55k',
-    description: 'Struggling to visualize your 2D ideas? Let us guide you through building your first 3D home. It\'s much easier than building blocks when shown correctly.',
-    imageUrl: 'https://lh3.googleusercontent.com/d/1wl6by5AO5MiPeoYsZ8F6Zi5AJahoeTQo',
-    learningPoints: ['Overcome the anxiety of a blank 3D screen', 'Organize models safely so they never crash your PC', 'Download beautiful pre-made models effortlessly'],
-    workflowImpact: 'See your imagination comfortably come to life instantly.'
+    id: '2', title: 'BIM with Revit', software: 'Revit', students: '38k',
+    description: 'Build smart 3D buildings on your computer with automated floor plans and schedules.',
+    imageUrl: 'https://lh3.googleusercontent.com/d/1N_BbG9kAEwIk541Id53_RV0CWjO1jzAt=w400-rw',
+    learningPoints: ['Create 3D buildings with automatic floor plans', 'Calculate material quantities automatically', 'Collaborate on big projects easily'],
+    workflowImpact: 'Save days of work with automated BIM schedules.'
   },
   {
-    id: '5', title: 'V-Ray Realism', software: 'V-Ray', students: '48k',
-    description: 'Are your renders feeling cartoonish or fake looking? We\'ll hold your hand through the scary lighting settings until your images look like real photography.',
-    imageUrl: 'https://lh3.googleusercontent.com/d/1aHEt_z78tYD_0Cn66DiduAnhwn-o8El8',
-    learningPoints: ['Simple lighting setups that always work reliably', 'Creating comforting materials that feel real to touch', 'Gentle editing tricks to make any render pop beautifully'],
-    workflowImpact: 'Relax and watch your clients gasp when they see their future home.'
+    id: '3', title: 'SketchUp Pro', software: 'SketchUp', students: '55k',
+    description: 'The easiest way to design 3D houses, kitchens, and bedrooms in minutes.',
+    imageUrl: 'https://lh3.googleusercontent.com/d/1wl6by5AO5MiPeoYsZ8F6Zi5AJahoeTQo=w400-rw',
+    learningPoints: ['Pull simple shapes into 3D houses instantly', 'Add furniture, colors, and textures easily', 'Create 3D views to show your clients'],
+    workflowImpact: 'Model dream spaces in just minutes.'
   },
   {
-    id: '6', title: 'Lumion Cinema', software: 'Lumion', students: '31k',
-    description: 'Want to tell a story but animation seems too hard? We\'ll show you how to easily create beautiful, gentle walking tours of your designs that win over any client.',
-    imageUrl: 'https://lh3.googleusercontent.com/d/1XW2DDHVa1Qc15NcZ3wUKMFRT7LkyZMCt',
-    learningPoints: ['Adding life effortlessly: waving trees and walking people', 'Setting up cameras without the confusing tech setups', 'Rendering video smoothly on your machine safely'],
-    workflowImpact: 'Win projects easily by making clients emotionally feel the space.'
+    id: '4', title: '3ds Max Advanced', software: '3ds Max', students: '22k',
+    description: 'Design fancy furniture and luxury interiors that command top design fees.',
+    imageUrl: 'https://lh3.googleusercontent.com/d/1DgmIvkeC2dxGpRpzbIthHQsSdlCty2Xg=w400-rw',
+    learningPoints: ['Model complex shapes like twisted towers', 'Create soft fabrics, pillows, and blankets', 'Design high-end luxury interior spaces'],
+    workflowImpact: 'Charge more for premium, high-detail luxury designs.'
   },
   {
-    id: '7', title: 'D5 Render', software: 'D5 Render', students: '19k',
-    description: 'Hate waiting frustrating hours for a single image to load? We\'ll teach you this real-time engine safely so you can see your beautiful changes instantly as you work.',
-    imageUrl: 'https://lh3.googleusercontent.com/d/1vbV4j6K9sgzbbZ7qlRdgqPTXWiHBPLsr',
-    learningPoints: ['Set up D5 safely without overwhelming your computer', 'Painting comforting lights and materials in real-time', 'Creating cinematic 4K images effortlessly in seconds'],
-    workflowImpact: 'Confidently make live design changes while the client watches.'
+    id: '6', title: 'Lumion Cinematic', software: 'Lumion', students: '31k',
+    description: 'Make cinematic movies of your architecture with walking people and waving trees.',
+    imageUrl: 'https://lh3.googleusercontent.com/d/1XW2DDHVa1Qc15NcZ3wUKMFRT7LkyZMCt=w400-rw',
+    learningPoints: ['Add grass, trees, and water instantly', 'Make people walk and cars drive in your scene', 'Create a video tour of the house'],
+    workflowImpact: 'A 1-minute video sells a house better than 100 drawings.'
   },
   {
-    id: '9', title: 'AI Advantage', software: 'AI Architecture', students: '75k',
-    description: 'AI is changing fast, and we entirely understand it feels scary. We are here to guide you to generate concepts easily so you never have to stare at a blank page again.',
-    imageUrl: 'https://lh3.googleusercontent.com/d/1s-HzZVKpc9F92mLW2gMOPk0kVrKAqUIS',
-    learningPoints: ['Safely turn a simple sketch into a full 3D concept in seconds', 'Use friendly AI to fix rendering mistakes automatically', 'Become the highly sought-after, irreplaceable designer'],
-    workflowImpact: 'Turn your fear of AI confidently into your biggest professional advantage.'
+    id: '7', title: 'D5 Render Realtime', software: 'D5 Render', students: '19k',
+    description: 'See photorealistic results in real-time as you move the camera and change materials.',
+    imageUrl: 'https://lh3.googleusercontent.com/d/1vbV4j6K9sgzbbZ7qlRdgqPTXWiHBPLsr=w400-rw',
+    learningPoints: ['Real-time lighting preview while you work', 'Thousands of free drag-and-drop assets', 'Produce 4K renders in seconds'],
+    workflowImpact: 'Make live design changes during client meetings.'
   },
+  {
+    id: '8', title: 'Enscape VR', software: 'Enscape', students: '25k',
+    description: 'Walk inside your 3D design using VR goggles or send interactive walkthrough links.',
+    imageUrl: 'https://lh3.googleusercontent.com/d/1SmezP6LwT3yo9aE3oivpGkqS-xycSOyx=w400-rw',
+    learningPoints: ['One-click instant walkthrough generation', 'Send web links for client exploration', 'VR integration to impress premium clients'],
+    workflowImpact: 'Spot mistakes before construction starts.'
+  },
+  {
+    id: '9', title: 'AI Architecture', software: 'Midjourney', students: '60k',
+    description: 'Generate 100 jaw-dropping design ideas and client mood boards in 1 minute with AI.',
+    imageUrl: 'https://lh3.googleusercontent.com/d/1s-HzZVKpc9F92mLW2gMOPk0kVrKAqUIS=w400-rw',
+    learningPoints: ['Prompt engineering for architectural concepts', 'Instant client mood boards and style mixes', 'Never face creative block again'],
+    workflowImpact: 'Generate 50 concepts before your first coffee.'
+  },
+  {
+    id: '10', title: 'Generative Design', software: 'Stable Diffusion', students: '15k',
+    description: 'Turn rough hand sketches into realistic building designs using AI in seconds.',
+    imageUrl: 'https://lh3.googleusercontent.com/d/1xSzSjuL4imlbXwEYMwKw_vhuueDcFtHm=w400-rw',
+    learningPoints: ['Turn hand sketches into realistic renders', 'Change specific parts of an image with AI', 'Control geometry and materials with ControlNet'],
+    workflowImpact: 'Show a realistic design during the first client pitch.'
+  },
+  {
+    id: '11', title: 'Unreal Engine 5', software: 'Unreal Engine', students: '18k',
+    description: 'Make your architectural design look like an interactive high-end AAA video game.',
+    imageUrl: 'https://lh3.googleusercontent.com/d/14EfKoC7BfxXmYxd6t6qIE470yQaX0toW=w400-rw',
+    learningPoints: ['Lumen dynamic global illumination', 'Nanite virtualized geometry', 'Interactive playable walkthrough package'],
+    workflowImpact: 'Let clients walk inside their future home with a controller.'
+  },
+  {
+    id: '12', title: 'Post Production', software: 'Photoshop', students: '72k',
+    description: 'Add real skies, lighting glow, birds, and people to elevate renders to magazine quality.',
+    imageUrl: 'https://lh3.googleusercontent.com/d/1FkzIhdu7K5JeRFq7BM1wGV5MND_fLMKe=w400-rw',
+    learningPoints: ['Color grading and depth of field tricks', 'Seamless entourage blending', 'Make average renders look award-winning'],
+    workflowImpact: 'Turn standard 3D into high-end architectural photography.'
+  }
 ];
