@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Lock, Check, Loader2, ShieldCheck, AlertCircle, ArrowRight, Mail, Sparkles, CreditCard } from 'lucide-react';
+import { X, Lock, Check, Loader2, Mail, ShieldCheck, AlertCircle, RefreshCcw, ArrowRight, Sparkles, Timer } from 'lucide-react';
 import { trackLead, trackAddPaymentInfo, trackPurchase } from '../services/metaPixel';
 
 interface PaymentModalProps {
@@ -24,19 +24,15 @@ const PAYPAL_CLIENT_ID = 'AVC9JqvTUJ8ETT_-mn-mU2TEcduyzHywIfVXs36DwJGQquy0PZkNFP
 
 type ViewState = 'FORM' | 'PROCESSING' | 'SUCCESS' | 'CONNECTION_ERROR';
 
-const AVATAR_RENDERS = [
-  '/renders/RENDER-1.jpg', '/renders/RENDER-2.jpg', '/renders/RENDER-3.jpg',
-  '/renders/RENDER-4.jpg', '/renders/RENDER-5.jpg', '/renders/RENDER-6.jpg',
-  '/renders/RENDER-7.jpg'
-];
-
 export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const [viewState, setViewState] = useState<ViewState>('FORM');
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [nameError, setNameError] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
   const stripeRef = useRef<any>(null);
   const elementsRef = useRef<any>(null);
   const stripeInitialized = useRef(false);
@@ -60,11 +56,28 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
     }
   }, [isOpen, viewState]);
 
+  useEffect(() => {
+    if (!isOpen || viewState !== 'FORM') return;
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isOpen, viewState]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const resetModal = () => {
     setViewState('FORM');
+    setName('');
     setEmail('');
+    setNameError(false);
     setEmailError(false);
     setErrorMessage(null);
+    setTimeLeft(15 * 60);
     stripeRef.current = null;
     elementsRef.current = null;
     stripeInitialized.current = false;
@@ -73,6 +86,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
 
   const ensurePayPalLoaded = async (): Promise<void> => {
     if (window.paypal) return;
+
     const existingScript = document.querySelector('script[data-paypal-js="true"]') as HTMLScriptElement | null;
     if (existingScript) {
       await new Promise<void>((resolve, reject) => {
@@ -98,28 +112,29 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
     try {
       await ensurePayPalLoaded();
       if (!window.paypal) return;
+
       const container = document.getElementById('paypal-button-container');
       if (!container || paypalInitialized.current) return;
+
       paypalInitialized.current = true;
       container.innerHTML = '';
 
       window.paypal.Buttons({
         style: {
           layout: 'horizontal',
-          color: 'gold',
-          shape: 'pill',
+          color: 'blue',
+          shape: 'rect',
           label: 'paypal',
-          height: 42,
+          height: 45,
           tagline: false,
         },
         createOrder: (_data: any, actions: any) => {
-          const amount = selectedPlan === 'yearly' ? '180.00' : '20.00';
           return actions.order.create({
             purchase_units: [{
-              description: selectedPlan === 'yearly' ? 'Avada Design - Yearly Membership' : 'Avada Design - Monthly Membership',
+              description: 'Global Design Career Bundle - 12 Premium Courses',
               amount: {
                 currency_code: 'USD',
-                value: amount,
+                value: '49.00',
               },
             }],
           });
@@ -128,8 +143,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
           setViewState('PROCESSING');
           try {
             await actions.order.capture();
-            const val = selectedPlan === 'yearly' ? 180 : 20;
-            trackPurchase({ value: val, currency: 'USD', content_name: 'Avada Design Library' }, { email });
             navigate('/thank-you');
             onClose();
           } catch (err) {
@@ -141,48 +154,51 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
           console.error('PayPal error:', err);
           setErrorMessage('PayPal encountered an error. Please try card payment.');
         },
+        onCancel: () => {
+          setErrorMessage('Payment cancelled. Try again when ready.');
+        },
       }).render('#paypal-button-container');
     } catch (err) {
-      console.warn('PayPal init skipped:', err);
+      console.error('PayPal init error:', err);
     }
   };
 
   const initializeStripeUI = async (retry = 0) => {
     try {
-      if (!EFFECTIVE_STRIPE_KEY) throw new Error('Stripe Publishable Key not found.');
+      if (!EFFECTIVE_STRIPE_KEY) {
+        throw new Error('Stripe publishable key is missing.');
+      }
+
       await ensureStripeLoaded();
-      if (!window.Stripe) throw new Error('Stripe SDK did not load. Please check your connection and retry.');
+
+      if (!window.Stripe) {
+        throw new Error('Stripe SDK did not load. Please check your connection and retry.');
+      }
 
       stripeRef.current = window.Stripe(EFFECTIVE_STRIPE_KEY);
       elementsRef.current = stripeRef.current.elements({
         mode: 'payment',
-        amount: selectedPlan === 'yearly' ? 18000 : 2000,
+        amount: 4900,
         currency: 'usd',
-        appearance: {
-          theme: 'flat',
-          variables: {
-            colorPrimary: '#00D66F',
-            colorBackground: '#ffffff',
-            colorText: '#0f172a',
-            colorDanger: '#ef4444',
-            fontFamily: 'Inter, system-ui, sans-serif',
-            spacingUnit: '4px',
-            borderRadius: '12px',
-          },
-          rules: {
-            '.Input': { border: '1.5px solid #e2e8f0', boxShadow: 'none', padding: '12px 14px', borderRadius: '12px', backgroundColor: '#f8fafc' },
-            '.Input:focus': { border: '1.5px solid #00D66F', backgroundColor: '#ffffff', boxShadow: '0 0 0 3px rgba(0, 214, 111, 0.15)' },
-            '.Tab': { border: '1.5px solid #e2e8f0', borderRadius: '12px', backgroundColor: '#f8fafc' },
-            '.Tab--selected': { borderColor: '#00D66F', backgroundColor: '#ecfdf5' },
+      });
+
+      const paymentElement = elementsRef.current.create('payment', {
+        layout: 'tabs',
+        fields: {
+          billingDetails: {
+            name: 'never',
+            email: 'never',
+            address: 'never',
           },
         },
       });
 
-      const paymentElement = elementsRef.current.create('payment', { layout: 'tabs' });
       const mountPoint = document.getElementById('stripe-element-mount');
-      if (!mountPoint) throw new Error('Mount point not found');
+      if (!mountPoint) {
+        throw new Error('Could not initialize payment form. Please reopen checkout.');
+      }
+
       paymentElement.mount('#stripe-element-mount');
-      stripeInitialized.current = true;
     } catch (err: any) {
       if (retry < 2) {
         setTimeout(() => initializeStripeUI(retry + 1), 350);
@@ -194,20 +210,30 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
   };
 
   const ensureStripeLoaded = async (): Promise<void> => {
-    if (window.Stripe) return;
+    if (window.Stripe) {
+      return;
+    }
+
     const existingScript = document.querySelector('script[data-stripe-js="true"]') as HTMLScriptElement | null;
+
     if (existingScript) {
       await new Promise<void>((resolve, reject) => {
-        if (window.Stripe) { resolve(); return; }
+        if (window.Stripe) {
+          resolve();
+          return;
+        }
+
         existingScript.addEventListener('load', () => resolve(), { once: true });
         existingScript.addEventListener('error', () => reject(new Error('Unable to load Stripe SDK.')), { once: true });
       });
       return;
     }
+
     await new Promise<void>((resolve, reject) => {
       const script = document.createElement('script');
       script.src = 'https://js.stripe.com/v3/';
       script.async = true;
+      script.defer = true;
       script.dataset.stripeJs = 'true';
       script.onload = () => resolve();
       script.onerror = () => reject(new Error('Unable to load Stripe SDK.'));
@@ -216,17 +242,29 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
   };
 
   const handleCardPay = async () => {
+    if (!name.trim()) {
+      setNameError(true);
+      setErrorMessage('Please enter your full name.');
+      return;
+    }
+
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setEmailError(true);
       setErrorMessage('Enter a valid email to receive instant access.');
       return;
     }
+
+    if (!stripeRef.current || !elementsRef.current) {
+      setErrorMessage('Payment gateway is still loading. Please wait 2-3 seconds.');
+      return;
+    }
+
     setViewState('PROCESSING');
     setErrorMessage(null);
 
-    const price = selectedPlan === 'yearly' ? 180 : 20;
-    trackLead({ value: price, currency: 'USD', content_name: 'Stripe Card Checkout' }, { email });
-    trackAddPaymentInfo({ value: price, currency: 'USD' }, { email });
+    // Track Lead & AddPaymentInfo
+    trackLead({ value: 49, currency: 'USD', content_name: 'Stripe Card Checkout' }, { name, email });
+    trackAddPaymentInfo({ value: 49, currency: 'USD' }, { name, email });
 
     try {
       const { error: submitError } = await elementsRef.current.submit();
@@ -236,7 +274,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
         return;
       }
 
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
       if (SUPABASE_ANON_KEY) {
         headers.apikey = SUPABASE_ANON_KEY;
         headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`;
@@ -246,16 +287,21 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
         method: 'POST',
         headers,
         body: JSON.stringify({
-          items: [{ id: selectedPlan === 'yearly' ? 'yearly-bundle' : 'monthly-bundle' }],
+          items: [{ id: 'global-design-bundle' }],
           email,
-          name: email.split('@')[0],
-          amount: price,
+          name,
+          amount: 49,
           currency: 'USD',
         }),
       });
 
-      if (!res.ok) throw new Error('Server error');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error: ${res.status}`);
+      }
+
       const { clientSecret } = await res.json();
+
       const result = await stripeRef.current.confirmPayment({
         elements: elementsRef.current,
         clientSecret,
@@ -264,9 +310,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
           receipt_email: email,
           payment_method_data: {
             billing_details: {
-              name: email.split('@')[0],
+              name: name,
               email: email,
-              address: { country: 'US' },
+              address: {
+                country: 'US', // Defaulting to US if hidden, Stripe requires a country for some methods
+              },
             },
           },
         },
@@ -274,17 +322,17 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
       });
 
       if (result.error) {
-        setErrorMessage(result.error.message || 'Payment failed.');
+        setErrorMessage(result.error.message || 'Payment failed. Please try another card.');
         setViewState('FORM');
         return;
       }
 
       if (result.paymentIntent?.status === 'succeeded') {
-        trackPurchase({ value: price, currency: 'USD', content_name: 'Avada Design & Architecture Library' }, { email });
+        trackPurchase({ value: 49, currency: 'USD', content_name: 'Avada 12-Course Architecture & Design Bundle' }, { name, email });
         navigate('/thank-you');
         onClose();
       } else {
-        setErrorMessage('Payment not completed.');
+        setErrorMessage('Payment not completed. Please try again.');
         setViewState('FORM');
       }
     } catch (err: any) {
@@ -296,234 +344,188 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-md transition-opacity" onClick={onClose} />
+    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={onClose} />
 
-      {/* Modal Container */}
-      <div className="relative w-full max-w-[520px] bg-white rounded-[28px] sm:rounded-[36px] shadow-[0_20px_70px_rgba(0,0,0,0.3),0_0_50px_rgba(0,214,111,0.25)] border-[2.5px] border-[#00D66F] overflow-hidden z-10 text-slate-900 animate-[fadeIn_0.25s_ease-out] my-auto">
-        
-        {/* Close Button */}
-        <button 
-          onClick={onClose} 
-          aria-label="Close modal"
-          className="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer z-20"
-        >
-          <X size={18} />
-        </button>
+      <div className="relative w-full max-w-[940px] bg-white rounded-[24px] shadow-2xl overflow-hidden flex flex-col md:flex-row h-[90vh] md:h-[650px] animate-[fadeIn_0.3s_ease-out]">
+        <div className="hidden md:flex w-[40%] bg-gray-50 text-gray-900 p-10 flex-col justify-between relative overflow-hidden border-r border-gray-100">
+          <div className="absolute top-0 right-0 w-[360px] h-[360px] bg-blue-50/60 rounded-full blur-[90px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-        <div className="p-5 sm:p-7 max-h-[90vh] overflow-y-auto custom-scrollbar">
-          
-          {/* Top Avatars Row */}
-          <div className="flex items-center justify-center -space-x-2 mb-3 pt-1">
-            {AVATAR_RENDERS.map((src, idx) => (
-              <img
-                key={idx}
-                src={src}
-                alt="Render Preview"
-                className="w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm bg-slate-200"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=100&auto=format&fit=crop&q=80';
-                }}
-              />
-            ))}
-          </div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-8 text-emerald-600 bg-emerald-50 w-fit px-3 py-1 rounded-full border border-emerald-100">
+              <ShieldCheck size={14} /> <span className="text-[10px] font-bold uppercase tracking-widest">Secure Global Checkout</span>
+            </div>
+            <h2 className="text-3xl font-display font-black leading-none mb-3 tracking-tight">Global Design <br />Career Bundle</h2>
+            <div className="text-sm font-medium text-gray-500 mb-8">Instant Access • Lifetime Ownership</div>
 
-          {/* Green Dot Badge */}
-          <div className="flex justify-center mb-2.5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/80">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Complete SketchUp & 3D Library • +100 Added Every Week
-            </span>
-          </div>
+            <div className="flex items-baseline gap-3 mb-10">
+              <span className="text-6xl font-black text-gray-900 tracking-tighter">$49</span>
+              <span className="text-xl text-gray-600 line-through font-medium">$199</span>
+            </div>
 
-          {/* Header Title & Subtitle */}
-          <div className="text-center mb-5">
-            <h2 className="text-2xl sm:text-[26px] font-black tracking-tight text-slate-950 leading-tight">
-              Unlock Sketchup Models Library
-            </h2>
-            <p className="text-xs sm:text-[13px] text-slate-500 mt-1 font-medium">
-              {selectedPlan === 'monthly' ? (
-                <>7 days free, then <span className="font-bold text-slate-800">$20/month</span>. Cancel anytime in 1 click.</>
-              ) : (
-                <>Instant full library access for <span className="font-bold text-slate-800">$180/year</span> (Save $60). Cancel anytime.</>
-              )}
-            </p>
-          </div>
-
-          {/* Plan Selector (Monthly vs Yearly) */}
-          <div className="grid grid-cols-2 gap-3 mb-5">
-            {/* Monthly Card */}
-            <button
-              type="button"
-              onClick={() => setSelectedPlan('monthly')}
-              className={`relative text-left p-3.5 rounded-2xl border-2 transition-all cursor-pointer ${
-                selectedPlan === 'monthly'
-                  ? 'border-[#00D66F] bg-emerald-50/40 shadow-sm'
-                  : 'border-slate-200 bg-white hover:border-slate-300'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-bold text-slate-700">Monthly</span>
-                <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                  selectedPlan === 'monthly' ? 'border-[#00D66F] bg-[#00D66F]' : 'border-slate-300'
-                }`}>
-                  {selectedPlan === 'monthly' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+            <div className="space-y-4">
+              {[
+                'Instant access right after payment',
+                'Lifetime updates included',
+                'Project files + templates included',
+                '7-Day Refund Policy',
+              ].map((item, i) => (
+                <div key={i} className={`flex items-center gap-3 text-sm font-bold ${item.includes('Refund') ? 'text-gray-900 bg-gray-100/50 p-1.5 -ml-1.5 rounded-lg' : 'text-gray-600'}`}>
+                  <div className="w-5 h-5 rounded-full bg-white border border-gray-200 flex items-center justify-center text-brand-primary shadow-sm"><Check size={12} strokeWidth={4} /></div>
+                  {item}
                 </div>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl font-black text-slate-900">$20</span>
-                <span className="text-[11px] font-semibold text-slate-500">/month</span>
-              </div>
-              <p className="text-[10px] text-slate-500 mt-0.5 font-medium">Billed monthly</p>
-            </button>
-
-            {/* Yearly Card */}
-            <button
-              type="button"
-              onClick={() => setSelectedPlan('yearly')}
-              className={`relative text-left p-3.5 rounded-2xl border-2 transition-all cursor-pointer ${
-                selectedPlan === 'yearly'
-                  ? 'border-[#00D66F] bg-emerald-50/40 shadow-sm'
-                  : 'border-slate-200 bg-white hover:border-slate-300'
-              }`}
-            >
-              <span className="absolute -top-2.5 right-3 bg-[#00D66F] text-slate-950 font-black text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-                25% OFF
-              </span>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-bold text-slate-700">Yearly</span>
-                <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                  selectedPlan === 'yearly' ? 'border-[#00D66F] bg-[#00D66F]' : 'border-slate-300'
-                }`}>
-                  {selectedPlan === 'yearly' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                </div>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl font-black text-slate-900">$180</span>
-                <span className="text-[11px] font-semibold text-slate-500">/year</span>
-              </div>
-              <p className="text-[10px] text-emerald-600 font-bold mt-0.5">$15/mo • Save $60</p>
-            </button>
-          </div>
-
-          {/* Payment & Access Bar */}
-          <div className="flex items-center justify-between px-1 mb-3">
-            <span className="text-[11px] font-bold tracking-wide uppercase text-slate-500">
-              Payment & Access Email
-            </span>
-            <div className="flex items-center gap-1.5 opacity-80">
-              {/* Payment Brand Badges */}
-              <span className="text-[10px] font-extrabold bg-slate-100 text-blue-800 px-1.5 py-0.5 rounded border border-slate-200">VISA</span>
-              <span className="text-[10px] font-extrabold bg-slate-100 text-red-600 px-1.5 py-0.5 rounded border border-slate-200">MC</span>
-              <span className="text-[10px] font-extrabold bg-slate-100 text-blue-600 px-1.5 py-0.5 rounded border border-slate-200">AMEX</span>
-              <span className="text-[10px] font-extrabold bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">DISC</span>
+              ))}
             </div>
           </div>
 
-          {/* Express Checkout (PayPal / Link) */}
-          <div className="mb-4">
-            <div id="paypal-button-container" className="min-h-[42px]"></div>
+          <div className="relative z-10 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+            <div className="text-[11px] font-bold text-gray-900">Trusted by 23,000+ learners worldwide</div>
+            <div className="text-[10px] text-gray-500 uppercase tracking-wider">Designers • Architects • Freelancers</div>
           </div>
+        </div>
 
-          {/* Divider */}
-          <div className="relative flex items-center justify-center mb-4">
-            <div className="border-t border-slate-200 w-full"></div>
-            <span className="bg-white px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 shrink-0">
-              OR PAY WITH CARD
-            </span>
-          </div>
-
-          {/* Form Body */}
-          {viewState === 'CONNECTION_ERROR' ? (
-            <div className="text-center py-6 space-y-3 bg-red-50/50 rounded-2xl p-4 border border-red-100">
-              <AlertCircle size={28} className="text-red-500 mx-auto" />
-              <p className="text-xs text-red-600 font-medium">Unable to connect to payment server.</p>
-              <button
-                onClick={() => { setViewState('FORM'); stripeInitialized.current = false; initializeStripeUI(); }}
-                className="text-xs font-bold text-emerald-600 underline"
-              >
-                Try Again
-              </button>
+        <div className="flex-1 bg-white flex flex-col relative h-full">
+          <div className="px-4 py-4 border-b border-gray-100 flex items-center justify-between shrink-0 z-20 bg-white">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Sparkles size={18} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-gray-900">Secure Checkout</h3>
+                <p className="text-[11px] text-gray-500">One-time payment • Instant access</p>
+              </div>
             </div>
-          ) : (
-            <div className="space-y-3.5">
-              {/* Email Input */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                  Enter your email for access <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <Mail size={16} />
-                  </div>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value); setEmailError(false); setErrorMessage(null); }}
-                    placeholder="name@example.com"
-                    className={`w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border text-sm font-medium rounded-xl text-slate-900 placeholder:text-slate-400 transition-all focus:outline-none focus:bg-white ${
-                      emailError ? 'border-red-400 bg-red-50/30' : 'border-slate-200 focus:border-[#00D66F] focus:ring-2 focus:ring-[#00D66F]/20'
-                    }`}
-                  />
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-900 transition-colors"><X size={20} /></button>
+          </div>
+
+          <div className="flex-1 px-4 py-4 overflow-y-auto">
+            {viewState === 'CONNECTION_ERROR' && (
+              <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
+                <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-red-500"><AlertCircle size={24} /></div>
+                <div>
+                  <h4 className="text-lg font-bold text-gray-900">Checkout Unavailable</h4>
+                  <p className="text-sm text-gray-500 mt-1">Please retry in a moment.</p>
                 </div>
+                <button onClick={resetModal} className="px-5 py-2.5 bg-gray-900 text-white rounded-xl font-bold text-sm flex items-center gap-2">
+                  <RefreshCcw size={14} /> Retry
+                </button>
               </div>
+            )}
 
-              {/* Card Inputs */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                  Card information
-                </label>
-                <div id="stripe-element-mount" className="bg-slate-50 rounded-xl border border-slate-200 p-2"></div>
-              </div>
-
-              {/* Error Box */}
-              {errorMessage && (
-                <div className="p-3 bg-red-50 text-red-600 rounded-xl text-xs font-semibold flex items-center gap-2 border border-red-100">
-                  <AlertCircle size={15} className="shrink-0 text-red-500" />
-                  <span>{errorMessage}</span>
-                </div>
-              )}
-
-              {/* Primary Green CTA Button */}
-              <button
-                type="button"
-                onClick={handleCardPay}
-                disabled={viewState === 'PROCESSING'}
-                className="w-full py-3.5 px-5 bg-[#00D66F] hover:bg-[#00c063] active:scale-[0.99] text-slate-950 font-black text-[15px] sm:text-base rounded-xl shadow-[0_10px_25px_rgba(0,214,111,0.35)] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed mt-2"
-              >
-                {viewState === 'PROCESSING' ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="animate-spin text-slate-950" size={20} />
-                    <span>Processing Securely...</span>
+            {(viewState === 'FORM' || viewState === 'PROCESSING') && (
+              <div className="space-y-4">
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-4 text-white">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Complete Bundle</p>
+                      <p className="font-bold text-white text-sm">12 Premium Courses</p>
+                      <p className="text-[11px] text-gray-400 mt-0.5">Lifetime access • <span className="text-white font-black">7-Day Refund</span></p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-black text-white">$49</p>
+                      <p className="text-xs text-gray-500 line-through">$199</p>
+                    </div>
                   </div>
-                ) : (
-                  <>
-                    <Lock size={16} className="text-slate-950" />
-                    <span>{selectedPlan === 'monthly' ? 'Start 7-Day Free Trial' : 'Unlock Instant Access'}</span>
-                    <ArrowRight size={18} className="text-slate-950" />
-                  </>
+                  {timeLeft > 0 && (
+                    <div className="mt-3 pt-3 border-t border-gray-700 flex items-center justify-center gap-2 text-amber-400">
+                      <Timer size={14} />
+                      <span className="text-xs font-bold">Offer expires in {formatTime(timeLeft)}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Full Name</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Lock className={`h-4 w-4 ${nameError ? 'text-red-400' : 'text-gray-400'}`} />
+                      </div>
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => { setName(e.target.value); setNameError(false); setErrorMessage(null); }}
+                        placeholder="John Doe"
+                        className={`block w-full pl-9 pr-3 py-3 bg-gray-50 border text-sm font-medium rounded-xl transition-all focus:outline-none focus:bg-white ${nameError ? 'border-red-300 bg-red-50/50' : 'border-gray-200 focus:border-emerald-500'}`}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Email Address</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Mail className={`h-4 w-4 ${emailError ? 'text-red-400' : 'text-gray-400'}`} />
+                      </div>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => { setEmail(e.target.value); setEmailError(false); setErrorMessage(null); }}
+                        placeholder="you@example.com"
+                        className={`block w-full pl-9 pr-3 py-3 bg-gray-50 border text-sm font-medium rounded-xl transition-all focus:outline-none focus:bg-white ${emailError ? 'border-red-300 bg-red-50/50' : 'border-gray-200 focus:border-emerald-500'}`}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Lock size={10} className="text-gray-400" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Card details</span>
+                  </div>
+                  <div id="stripe-element-mount" className="bg-gray-50 rounded-xl border border-gray-200 p-1"></div>
+                </div>
+
+                {errorMessage && (
+                  <div className="p-3 bg-red-50 text-red-600 rounded-xl text-xs font-bold flex items-center gap-2 border border-red-100">
+                    <AlertCircle size={14} className="shrink-0" />
+                    {errorMessage}
+                  </div>
                 )}
-              </button>
+
+                <button
+                  onClick={handleCardPay}
+                  disabled={viewState === 'PROCESSING'}
+                  className="w-full py-4 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white rounded-xl font-black text-base shadow-lg shadow-emerald-500/30 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70"
+                >
+                  {viewState === 'PROCESSING' ? <Loader2 className="animate-spin" size={20} /> : <><span>Get Access Now</span> <ArrowRight size={18} /></>}
+                </button>
+
+                <div className="pt-3 border-t border-dashed border-gray-200">
+                  <p className="text-[10px] text-center text-gray-400 font-medium mb-3">Or pay with PayPal</p>
+                  <div id="paypal-button-container" className="min-h-[45px]"></div>
+                </div>
+              </div>
+            )}
+
+            {viewState === 'SUCCESS' && (
+              <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-6">
+                <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center shadow-xl shadow-emerald-500/30">
+                  <Check size={40} className="text-white" strokeWidth={3} />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black text-gray-900 mb-1">Payment Successful!</h3>
+                  <p className="text-gray-500 text-sm">Check your email for instant access.</p>
+                </div>
+                <button
+                  onClick={onClose}
+                  className="w-full py-3.5 bg-gray-900 text-white rounded-xl font-bold text-base hover:bg-black transition-all"
+                >
+                  Done
+                </button>
+              </div>
+            )}
+          </div>
+
+          {(viewState === 'FORM' || viewState === 'PROCESSING') && (
+            <div className="p-4 border-t border-gray-100 bg-white shrink-0 z-20">
+              <div className="flex items-center justify-center gap-4 text-[10px] text-gray-500 font-bold">
+                <span className="flex items-center gap-1"><ShieldCheck size={12} className="text-emerald-500" /> Secure</span>
+                <span className="flex items-center gap-1"><Lock size={12} className="text-blue-500" /> Encrypted</span>
+                <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-100 uppercase tracking-tighter">7-Day Refund</span>
+              </div>
             </div>
           )}
-
-          {/* Footer Security Badges */}
-          <div className="mt-4 pt-3 border-t border-slate-100 flex flex-col items-center gap-1.5 text-center">
-            <div className="flex items-center justify-center gap-2 text-[11px] font-semibold text-slate-500">
-              <span className="flex items-center gap-1 text-slate-600">
-                <ShieldCheck size={14} className="text-[#00D66F]" /> 256-Bit SSL Encrypted
-              </span>
-              <span>•</span>
-              <span className="text-slate-600">Powered by Stripe</span>
-              <span>•</span>
-              <span className="text-slate-600">Cancel Anytime</span>
-            </div>
-            <p className="text-[10px] text-slate-400 font-medium">
-              Immediate access link will be delivered straight to your email.
-            </p>
-          </div>
-
         </div>
       </div>
     </div>
