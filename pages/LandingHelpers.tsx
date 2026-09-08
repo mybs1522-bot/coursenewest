@@ -96,12 +96,12 @@ export const DESIGN_MENTORS = [
 /* ─── LOGO ─── */
 export const Logo = () => (
   <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => window.location.href = '/'}>
-    <div className="relative w-8 h-8 md:w-9 md:h-9 border-2 border-slate-950 flex items-center justify-center bg-yellow-400 font-display font-black text-base md:text-lg text-slate-950 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-xl">
+    <div className="w-8 h-8 md:w-9 md:h-9 bg-black text-white flex items-center justify-center font-display font-black text-sm md:text-base rounded-xl tracking-tighter border border-zinc-800 shadow-sm">
       AV
     </div>
     <div className="flex flex-col text-left">
-      <span className="font-display font-black text-base md:text-lg tracking-tight leading-none text-slate-950">Avada Design</span>
-      <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.2em] text-orange-600 mt-0.5">Architecture Academy</span>
+      <span className="font-display font-black text-base md:text-lg tracking-tight leading-none text-black">Avada Design</span>
+      <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.25em] text-zinc-500 mt-0.5">Architecture Academy</span>
     </div>
   </div>
 );
@@ -116,27 +116,27 @@ export const CallToActionWidget = ({ timeLeft, onClick, headline, subtext }: { t
   const f = (v: number) => v.toString().padStart(2, '0');
   const h = f(timeLeft.h), m = f(timeLeft.m), s = f(timeLeft.s);
   return (
-    <div className="relative py-10 md:py-16 px-5 md:px-8 overflow-hidden rounded-3xl bg-slate-950 text-white my-8 max-w-5xl mx-auto shadow-2xl border border-slate-800">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-orange-500/10 blur-[140px] rounded-full pointer-events-none"></div>
+    <div className="relative py-10 md:py-16 px-5 md:px-8 overflow-hidden rounded-3xl bg-black text-white my-8 max-w-5xl mx-auto shadow-2xl border border-zinc-800">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-zinc-800/30 blur-[140px] rounded-full pointer-events-none"></div>
       <div className="max-w-2xl mx-auto relative z-10 text-center">
-        <div className="inline-block bg-yellow-400 text-slate-950 font-black text-[10px] sm:text-xs uppercase tracking-widest px-3.5 py-1 rounded-full mb-3 shadow-sm">
-          🚨 STUDENTS WEEK DISCOUNT ($49 USD / 66% OFF)
+        <div className="inline-block bg-zinc-900 border border-zinc-700 text-zinc-200 font-bold text-[10px] sm:text-xs uppercase tracking-widest px-3.5 py-1 rounded-full mb-3">
+          Limited Enrollment Offer • $49 USD Lifetime
         </div>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-black text-white mb-2 tracking-tight">
           {headline || "Start Learning Architecture & 3D Design Today"}
         </h2>
-        <p className="text-xs sm:text-sm text-zinc-400 mb-6 max-w-lg mx-auto leading-relaxed font-medium">
-          {subtext || "Get instant access to all 12 courses, free software links, and 24/7 team guidance."}
+        <p className="text-xs sm:text-sm text-zinc-400 mb-6 max-w-lg mx-auto leading-relaxed font-normal">
+          {subtext || "Get instant access to all 12 courses, software download links, and dedicated mentor guidance."}
         </p>
         
         <div className="flex flex-col items-center justify-center gap-3 mb-6">
-          <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 px-5 py-2 rounded-2xl">
-            <span className="text-xs font-mono text-zinc-400 uppercase font-bold">Offer Ends In</span>
-            <div className="flex items-center gap-1 font-mono text-yellow-400 font-bold text-sm sm:text-base">
+          <div className="flex items-center gap-3 bg-zinc-900/90 border border-zinc-800 px-5 py-2 rounded-2xl">
+            <span className="text-xs font-mono text-zinc-400 uppercase font-medium">Offer Closes In</span>
+            <div className="flex items-center gap-1 font-mono text-white font-bold text-sm sm:text-base">
               <span>{h}h</span>
-              <span>:</span>
+              <span className="text-zinc-500">:</span>
               <span>{m}m</span>
-              <span>:</span>
+              <span className="text-zinc-500">:</span>
               <span>{s}s</span>
             </div>
           </div>
@@ -145,19 +145,19 @@ export const CallToActionWidget = ({ timeLeft, onClick, headline, subtext }: { t
         <div className="w-full max-w-md mx-auto">
           <button 
             onClick={onClick} 
-            className="w-full py-4 sm:py-5 bg-gradient-to-r from-red-600 via-orange-600 to-red-600 text-white rounded-2xl font-black text-base sm:text-lg uppercase tracking-wider shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 border-2 border-slate-950 shadow-[4px_4px_0px_#000]"
+            className="w-full py-4 sm:py-4.5 bg-white hover:bg-zinc-200 active:scale-[0.99] text-black rounded-2xl font-black text-base uppercase tracking-wider transition-all flex items-center justify-center gap-3 cursor-pointer shadow-lg"
           >
-            <span>Claim Offer & Download ($49 USD)</span>
-            <ArrowRight size={20} />
+            <span>Claim Instant Access ($49 USD)</span>
+            <ArrowRight size={18} />
           </button>
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 md:gap-4 text-[10px] sm:text-xs text-zinc-400 font-bold uppercase tracking-wider">
-          <span>🛡️ 7-Day 100% Money-Back Guarantee</span>
-          <span>•</span>
-          <span>⚡ Instant Access</span>
-          <span>•</span>
-          <span>💬 24/7 WhatsApp Support</span>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 md:gap-4 text-[10px] sm:text-xs text-zinc-400 font-medium tracking-wide">
+          <span>7-Day Money-Back Guarantee</span>
+          <span className="text-zinc-600">•</span>
+          <span>Instant Download</span>
+          <span className="text-zinc-600">•</span>
+          <span>Official Certification</span>
         </div>
       </div>
     </div>
@@ -177,11 +177,11 @@ export const SocialProofToast: React.FC = () => {
   const j = RAW_JOINERS[idx];
   return (
     <div className={`fixed bottom-20 left-4 z-[70] transition-all duration-500 ${visible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
-      <div className="bg-white/95 backdrop-blur-xl border border-slate-200 rounded-2xl px-5 py-3 shadow-2xl flex items-center gap-3 max-w-xs">
-        <div className="w-8 h-8 bg-emerald-50 rounded-full flex items-center justify-center shrink-0"><CheckCircle size={16} className="text-emerald-600" /></div>
+      <div className="bg-white/95 backdrop-blur-xl border border-zinc-200 rounded-2xl px-5 py-3 shadow-xl flex items-center gap-3 max-w-xs">
+        <div className="w-8 h-8 bg-zinc-100 border border-zinc-200 rounded-full flex items-center justify-center shrink-0"><CheckCircle size={15} className="text-zinc-900" /></div>
         <div>
-          <p className="text-sm font-bold text-slate-900">{j.name} from {j.city}</p>
-          <p className="text-xs text-slate-500">just enrolled • {j.time}</p>
+          <p className="text-sm font-bold text-zinc-900">{j.name} from {j.city}</p>
+          <p className="text-xs text-zinc-500">just enrolled • {j.time}</p>
         </div>
       </div>
     </div>
