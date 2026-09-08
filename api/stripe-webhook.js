@@ -36,18 +36,14 @@ export default async function handler(req, res) {
 
     const html = `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#09090b;color:#fff;padding:36px;border-radius:24px;">
       <div style="display:inline-block;background:#000;border:1px solid #3f3f46;border-radius:12px;padding:8px 16px;font-weight:900;font-size:14px;color:#fff;margin-bottom:20px;">AVADA DESIGN</div>
-      <h1 style="color:#fff;margin:0 0 12px;font-size:24px;font-weight:900;">Your Order is Confirmed! 🚁</h1>
+      <h1 style="color:#fff;margin:0 0 12px;font-size:24px;font-weight:900;">Your Order is Confirmed! 🚀</h1>
       <p style="color:#a1a1aa;font-size:15px;line-height:1.6;">Hi ${name || 'there'}, thank you for enrolling in the <strong>Avada Architecture & Interior Design 12-Course Bundle</strong>. Your instant access is ready below:</p>
-      <a href="${DRIVE_LINK}" style="display:inline-block;background:#00D66F;color:#000;text-decoration:none;padding:16px 32px;border-radius:12px;font-weight:900;font-size:16px;margin:15px 0 25px;">👀 Open Google Drive Course Folder</a>
-      <div style="background:#1818b;border:1px solid #27272a;border-radius:12px;padding:16px;text-align:left;">
+      <a href="${DRIVE_LINK}" style="display:inline-block;background:#00D66F;color:#000;text-decoration:none;padding:16px 32px;border-radius:12px;font-weight:900;font-size:16px;margin:15px 0 25px;">Open Google Drive Course Folder</a>
+      <div style="background:#18181b;border:1px solid #27272a;border-radius:12px;padding:16px;text-align:left;">
         <p style="margin:0;color:#71717a;font-size:12px;">Order ID: ${orderId}</p>
-        <p style="margin:4px 0 0;color:#71717a;font-size:12px;">WhatsApp Support: ${WHATSAPP_NUMBER}</p>
       </div>
-    </div>
-    <p style="text-align:center;color:#52525b;font-size:12px;margin-top:24px;">© 2026 Avada Design & Architecture. All rights reserved.</p>
-  </div>
-</body>
-</html>`;
+      <p style="text-align:center;color:#52525b;font-size:12px;margin-top:24px;">© 2026 Avada Design & Architecture. All rights reserved.</p>
+    </div>`;
 
     const resendRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
