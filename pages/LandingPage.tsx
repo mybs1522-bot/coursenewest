@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Star, CheckCircle, CheckCircle2, X, ChevronDown, Sparkles, Download, ShieldCheck, Zap, Users } from 'lucide-react';
 import { WhatsAppButton } from '../components/WhatsAppButton';
+import { PaymentModal } from '../components/PaymentModal';
 import {
   Logo, CallToActionWidget, SocialProofToast,
   PROBLEM_POINTS, TRANSFORMATION_STORIES, FEAR_STATS,
@@ -12,7 +12,7 @@ import {
 import { trackViewContent, trackInitiateCheckout } from '../services/metaPixel';
 
 const LandingPage: React.FC = () => {
-  const navigate = useNavigate();
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [timeLeft, setTimeLeft] = useState(() => {
     const D = (3 * 3600 + 36 * 60 + 20) * 1000, r = D - (Date.now() % D);
     return { h: Math.floor((r / 3600000) % 24), m: Math.floor((r / 60000) % 60), s: Math.floor((r / 1000) % 60) };
@@ -43,7 +43,7 @@ const LandingPage: React.FC = () => {
 
   const openCheckout = () => {
     trackInitiateCheckout();
-    navigate('/checkout');
+    setShowPaymentModal(true);
   };
   const formatTime = (v: number) => v.toString().padStart(2, '0');
 
@@ -691,6 +691,7 @@ const LandingPage: React.FC = () => {
 
       <WhatsAppButton />
       <SocialProofToast />
+      <PaymentModal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} />
     </div>
   );
 };
