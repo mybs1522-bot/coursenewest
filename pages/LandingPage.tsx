@@ -8,6 +8,7 @@ import {
   VALUE_STACK_ITEMS, TESTIMONIALS_LANDING, FAQ_ITEMS_LANDING,
   COURSES_LANDING, PAGE_PREVIEWS_ROW1, PAGE_PREVIEWS_ROW2
 } from './LandingHelpers';
+import { trackViewContent, trackInitiateCheckout } from '../services/metaPixel';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -18,7 +19,10 @@ const LandingPage: React.FC = () => {
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
-  useEffect(() => { window.scrollTo(0, 0); }, []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    trackViewContent();
+  }, []);
 
   useEffect(() => {
     const calc = () => {
@@ -36,7 +40,10 @@ const LandingPage: React.FC = () => {
     return () => window.removeEventListener('scroll', h);
   }, []);
 
-  const openCheckout = () => navigate('/checkout');
+  const openCheckout = () => {
+    trackInitiateCheckout();
+    navigate('/checkout');
+  };
   const formatTime = (v: number) => v.toString().padStart(2, '0');
 
   return (

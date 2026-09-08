@@ -5,6 +5,7 @@ import { ChevronDown, Sparkles, ArrowRight, Timer, Star, CheckCircle2, Zap, Down
 import { CourseDetailModal } from '../components/CourseDetailModal';
 import { TextMarquee } from '../components/ui/text-marquee';
 import { PaymentModal } from '../components/PaymentModal';
+import { trackViewContent, trackInitiateCheckout } from '../services/metaPixel';
 
 // Logo Component
 const Logo = () => (
@@ -31,6 +32,15 @@ const CheckoutPage: React.FC = () => {
   const [detailCourse, setDetailCourse] = useState<Course | null>(null);
   const [highlightIndex, setHighlightIndex] = useState<number>(-1);
   const [mobileSlideIndex, setMobileSlideIndex] = useState(0);
+
+  useEffect(() => {
+    trackViewContent({ content_name: 'Checkout Page' });
+  }, []);
+
+  const openPayment = () => {
+    trackInitiateCheckout();
+    setShowPaymentModal(true);
+  };
 
   // Auto-slide for mobile showcase
   useEffect(() => {
@@ -175,7 +185,7 @@ const CheckoutPage: React.FC = () => {
         <div className="container mx-auto flex items-center justify-between">
           <Logo />
           <button
-            onClick={() => setShowPaymentModal(true)}
+            onClick={openPayment}
             className="flex items-center gap-2 bg-gray-900 text-white font-bold text-xs px-5 py-2.5 rounded-full hover:bg-black transition-colors"
           >
             <Download size={14} className="text-yellow-400" />
@@ -296,7 +306,7 @@ const CheckoutPage: React.FC = () => {
               </p>
             </div>
             <button
-              onClick={() => setShowPaymentModal(true)}
+              onClick={openPayment}
               className="mt-6 md:mt-8 inline-flex items-center gap-1.5 md:gap-3 px-5 md:px-10 py-3.5 md:py-5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl md:rounded-2xl font-bold text-[13px] md:text-lg shadow-xl shadow-blue-500/30 hover:shadow-blue-500/40 hover:scale-[1.02] transition-all group w-full sm:w-auto justify-center animate-shimmer border border-blue-400/50"
             >
               <Download size={16} className="md:w-5 md:h-5 shrink-0" />
@@ -350,7 +360,7 @@ const CheckoutPage: React.FC = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => setShowPaymentModal(true)}
+                  onClick={openPayment}
                   className="px-5 py-4 md:px-10 md:py-5 bg-brand-primary text-white font-bold text-sm md:text-lg rounded-xl md:rounded-2xl shadow-glow hover:shadow-glow-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2 md:gap-3 group shrink-0 w-full sm:w-auto animate-shimmer border border-blue-400/30"
                 >
                   <Download size={16} className="md:w-5 md:h-5 shrink-0" />
@@ -443,7 +453,7 @@ const CheckoutPage: React.FC = () => {
                 <div className="text-lg font-display font-bold text-white leading-tight">${BUNDLE_PRICE}</div>
               </div>
               <button
-                onClick={() => setShowPaymentModal(true)}
+                onClick={openPayment}
                 className="bg-brand-primary hover:bg-blue-700 text-white font-bold px-5 py-2 rounded-lg flex items-center gap-1.5 transition-all shadow-glow hover:shadow-glow-lg text-sm"
               >
                 <span className="sm:hidden font-display text-base">${BUNDLE_PRICE}</span>

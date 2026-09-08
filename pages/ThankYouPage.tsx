@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { CheckCircle2, Globe, ExternalLink, MessageCircle, ArrowRight, Sparkles, BookOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { trackPurchase, trackCompleteRegistration } from '../services/metaPixel';
 
 const ThankYouPage: React.FC = () => {
   const DRIVE_LINK = 'https://drive.google.com/drive/folders/1CCyv9u82HiYI8jnyULISfBoGMcbcqd9U?usp=drive_link';
@@ -8,6 +9,8 @@ const ThankYouPage: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    trackPurchase({ value: 49, currency: 'USD', content_name: 'Avada 12-Course Architecture & Design Bundle' });
+    trackCompleteRegistration({ status: true });
   }, []);
 
   return (

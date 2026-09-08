@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Lock, Check, Loader2, Mail, ShieldCheck, AlertCircle, RefreshCcw, ArrowRight, Sparkles, Timer } from 'lucide-react';
+import { trackLead, trackAddPaymentInfo, trackPurchase } from '../services/metaPixel';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -261,6 +262,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
     setViewState('PROCESSING');
     setErrorMessage(null);
 
+    // Track Lead & AddPaymentInfo
+    trackLead({ value: 49, currency: 'USD', content_name: 'Stripe Card Checkout' }, { name, email });
+    trackAddPaymentInfo({ value: 49, currency: 'USD' }, { name, email });
+
     try {
       const { error: submitError } = await elementsRef.current.submit();
       if (submitError) {
@@ -323,6 +328,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) =
       }
 
       if (result.paymentIntent?.status === 'succeeded') {
+        trackPurchase({ value: 49, currency: 'USD', content_name: 'Avada 12-Course Architecture & Design Bundle' }, { name, email });
         navigate('/thank-you');
         onClose();
       } else {

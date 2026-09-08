@@ -3,12 +3,14 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import CheckoutPage from './pages/CheckoutPage';
 import ThankYouPage from './pages/ThankYouPage';
+import { trackPageView } from './services/metaPixel';
 
 const App: React.FC = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    trackPageView({ page_path: pathname });
   }, [pathname]);
 
   return (
@@ -20,4 +22,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default App;
