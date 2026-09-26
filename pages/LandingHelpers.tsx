@@ -120,7 +120,7 @@ export const CallToActionWidget = ({ timeLeft, onClick, headline, subtext }: { t
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-zinc-800/30 blur-[140px] rounded-full pointer-events-none"></div>
       <div className="max-w-2xl mx-auto relative z-10 text-center">
         <div className="inline-block bg-zinc-900 border border-zinc-700 text-zinc-200 font-bold text-[10px] sm:text-xs uppercase tracking-widest px-3.5 py-1 rounded-full mb-3">
-          Limited Enrollment Offer • $49 USD Lifetime
+          Special Access • 100% Free Lifetime Access
         </div>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-black text-white mb-2 tracking-tight">
           {headline || "Start Learning Architecture & 3D Design Today"}
@@ -147,13 +147,13 @@ export const CallToActionWidget = ({ timeLeft, onClick, headline, subtext }: { t
             onClick={onClick} 
             className="w-full py-4 sm:py-4.5 bg-black hover:bg-zinc-900 active:scale-[0.99] text-white rounded-2xl font-black text-base uppercase tracking-wider transition-all flex items-center justify-center gap-3 cursor-pointer shadow-lg border-2 border-[#00D66F]"
           >
-            <span>Claim Instant Access ($49 USD)</span>
+            <span>Claim Free Instant Access</span>
             <ArrowRight size={18} className="text-[#00D66F]" />
           </button>
         </div>
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3 md:gap-4 text-[10px] sm:text-xs text-zinc-400 font-medium tracking-wide">
-          <span>7-Day Money-Back Guarantee</span>
+          <span>Instant Email Delivery</span>
           <span className="text-zinc-600">•</span>
           <span>Instant Download</span>
           <span className="text-zinc-600">•</span>
@@ -162,6 +162,156 @@ export const CallToActionWidget = ({ timeLeft, onClick, headline, subtext }: { t
       </div>
     </div>
   );
+};
+
+/* ─── INLINE SECTION CTA (4 PLACEMENTS) ─── */
+export const InlineSectionCta = ({
+  headline,
+  subtext,
+  onClick,
+  badgeText = "100% Free Lifetime Access",
+  buttonText = "Get Free Access"
+}: {
+  headline: string;
+  subtext: string;
+  onClick: () => void;
+  badgeText?: string;
+  buttonText?: string;
+}) => {
+  return (
+    <div className="w-full max-w-4xl mx-auto my-12 px-4">
+      <div className="relative overflow-hidden rounded-3xl bg-zinc-950 text-white p-7 sm:p-10 border border-zinc-800 shadow-2xl text-center">
+        <div className="absolute -top-16 -right-16 w-56 h-56 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider rounded-full mb-3.5 shadow-sm">
+            <Zap size={13} className="fill-emerald-400" />
+            <span>{badgeText}</span>
+          </div>
+          <h3 className="text-xl sm:text-2xl md:text-3xl font-display font-black text-white mb-2.5 tracking-tight leading-tight">
+            {headline}
+          </h3>
+          <p className="text-xs sm:text-sm text-zinc-400 mb-6 leading-relaxed max-w-xl">
+            {subtext}
+          </p>
+          <button
+            onClick={onClick}
+            className="w-full sm:w-auto px-8 sm:px-12 py-4 bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 active:scale-[0.99] text-zinc-950 font-black text-sm sm:text-base rounded-2xl shadow-xl shadow-emerald-500/25 transition-all flex items-center justify-center gap-2.5 cursor-pointer group"
+          >
+            <span>{buttonText}</span>
+            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+          </button>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-[11px] text-zinc-400">
+            <span>✓ No credit card required</span>
+            <span className="text-zinc-700">•</span>
+            <span>✓ Instant email delivery</span>
+            <span className="text-zinc-700">•</span>
+            <span>✓ Lifetime access</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── AVADA LEARN 5 CORE MASTERCLASSES BREAKDOWN ─── */
+export const CORE_MASTERCLASSES = [
+  {
+    number: "Course 01",
+    software: "SketchUp Pro",
+    title: "3D Spatial & Interior Modeling",
+    students: "55k+ Learners",
+    tag: "Spatial Planning",
+    description: "Build complete 3D interiors and building structures from scratch. Learn wall construction, door & window framing, custom cabinetry, and precision spatial modeling.",
+    points: [
+      "Turn 2D floor plans into full 3D homes, custom kitchens & master baths",
+      "Craft custom millwork: baseboards, crown molding, wardrobes & media units",
+      "Organize models with clean tags & layers ready for V-Ray and D5 export"
+    ],
+    impact: "Model an entire client space in hours instead of days."
+  },
+  {
+    number: "Course 02",
+    software: "V-Ray",
+    title: "Studio & Photorealistic Rendering",
+    students: "48k+ Learners",
+    tag: "High-End Lighting",
+    description: "Transform raw SketchUp geometry into magazine-grade photographs. Master realistic daylighting, artificial mood lighting, reflections, and PBR textures that sell $5,000+ projects.",
+    points: [
+      "Master Sun & Sky systems, HDRIs, recessed spotlights & accent LED strips",
+      "Create photoreal materials: wood grain, veined marble, brushed brass & sheer fabrics",
+      "Camera optics: Depth of field, lens focal lengths, exposure & color grading"
+    ],
+    impact: "Produce portfolio shots that command premium design fees."
+  },
+  {
+    number: "Course 03",
+    software: "D5 Render AI",
+    title: "Real-Time Ray Tracing & Walkthroughs",
+    students: "19k+ Learners",
+    tag: "GPU Real-Time",
+    description: "Experience real-time GPU rendering with integrated AI tools. See lighting and materials react in real time. Generate ultra-high-definition 4K renderings and cinematic fly-through videos in minutes.",
+    points: [
+      "Real-time viewport feedback: Make live adjustments right in front of clients",
+      "AI scene enhancements: Atmospheric fog, realistic sky generators & smart vegetation",
+      "Animate camera movements for cinematic 60fps walkthrough presentations"
+    ],
+    impact: "Close deals during meetings by showing live, real-time iterations."
+  },
+  {
+    number: "Course 04",
+    software: "AutoCAD",
+    title: "2D Drafting & Construction Blueprints",
+    students: "42k+ Learners",
+    tag: "Permit Ready",
+    description: "Learn how to create millimeter-accurate architectural plans, furniture layouts, elevations, and structural schematics that contractors can actually build from on site.",
+    points: [
+      "Draft detailed floor plans, door swings, wall schedules & electrical symbols",
+      "Set up professional layer standards, line weights, annotation scales & title blocks",
+      "Speed shortcuts and production hacks to finish drawings 10x faster"
+    ],
+    impact: "Produce error-free construction drawings that eliminate on-site mistakes."
+  },
+  {
+    number: "Course 05",
+    software: "Generative AI",
+    title: "AI in Interior & Architecture Design",
+    students: "60k+ Learners",
+    tag: "Midjourney & Stable Diffusion",
+    description: "Harness Midjourney and Stable Diffusion to generate 100 design concepts in 60 seconds. Turn rough napkins and hand sketches into realistic building concepts and client mood boards.",
+    points: [
+      "Architectural prompt formulas: specify camera angles, lighting conditions & materials",
+      "Image-to-Image & ControlNet: Convert hand sketches into photorealistic renders",
+      "Generate instant mood boards to lock in client style preferences in the first call"
+    ],
+    impact: "Never face a creative block again. Ideate at 100x speed."
+  }
+];
+
+/* ─── TRANSFORMATION COMPARISON ─── */
+export const TRANSFORMATION_COMPARISON = {
+  without: {
+    title: "Without This Workflow",
+    subtitle: "Stuck in Revisions & Low Fees",
+    points: [
+      "Days wasted on a single perspective with flat, unconvincing lighting",
+      "Inability to show live design options during client meetings",
+      "Cluttered CAD blueprints causing site execution arguments with builders",
+      "Falling behind as competing designers use AI to ideate 10x faster",
+      "Trapped charging $150–$300 for weeks of grueling trial-and-error"
+    ]
+  },
+  withSystem: {
+    title: "With The Avada System",
+    subtitle: "In-Demand Visualization Authority",
+    points: [
+      "Model any room in SketchUp, draft in AutoCAD, and render photoreal in V-Ray",
+      "Present real-time lighting changes in D5 Render AI live while clients watch",
+      "Ideate 50 client styles in minutes using Midjourney & ControlNet",
+      "Backed by 10,000+ textures, 2,000+ 3D models & 24/7 mentor support",
+      "Confidently quote $2,000–$5,000+ per room with a high-ticket portfolio"
+    ]
+  }
 };
 
 /* ─── SOCIAL PROOF TOAST ─── */
@@ -216,7 +366,7 @@ export const TESTIMONIALS_LANDING = [
   { name: 'Ethan B.', role: 'Senior Architect', location: 'Austin, USA', content: 'I feared AI would replace my studio. But Avada held my hand through the transition. We now use it to generate gorgeous concepts for clients in minutes.' },
   { name: 'Sophia N.', role: '3D Visualizer', location: 'Toronto, CA', content: 'The step-by-step guidance is amazing for beginners. Whenever my scene looks dark or weird, I just ask the support team. They are absolute lifesavers.' },
   { name: 'Emeka N.', role: 'Architecture Student', location: 'Seoul, KR', content: 'I felt so behind in university because they still teach completely outdated methods. Within two weeks here, I gained the confidence to start taking well-paying projects.' },
-  { name: 'Olivia M.', role: 'Interior Designer', location: 'Sydney, AU', content: 'To have someone to actually look at your screen and say "Oh, simply press this button" saves weeks of frustration. Best $49 I ever spent.' },
+  { name: 'Olivia M.', role: 'Interior Designer', location: 'Sydney, AU', content: 'To have someone to actually look at your screen and say "Oh, simply press this button" saves weeks of frustration. Best decision for my design career.' },
   { name: 'Liam O.', role: 'Landscape Architect', location: 'Madrid, ES', content: 'The continuous support makes learning stress-free. D5 Render combined with AI generation is just magical. It took away all my anxiety about falling behind.' },
   { name: 'Ava K.', role: 'Studio Owner', location: 'Berlin, DE', content: 'My studio workflow is now 10x faster. We pitch 10 options to clients in 1 hour.' },
   { name: 'Oliver W.', role: 'Freelance Visualizer', location: 'New York, USA', content: 'I almost quit 3D. This program made the learning process simple, practical, and profitable.' },
@@ -227,9 +377,9 @@ export const FAQ_ITEMS_LANDING = [
   { question: "I'm terrified of AI taking my job. Will this help?", answer: "We completely understand that fear! AI is scary if you ignore it, but it's an incredible superpower when you master it. We will hold your hand and teach you exactly how to use AI as your personal assistant, making you brilliantly fast and completely irreplaceable." },
   { question: "I am a complete beginner and get overwhelmed easily. Is this for me?", answer: "Yes, this program was built exactly with you in mind. We know learning software can be intimidating. We start from the absolute basics ('how to click here') and our team is always a WhatsApp message away to hold your hand when you feel stuck." },
   { question: "Are you really going to help me, or is this just another course?", answer: "This is a true 24/7 support community. When your render looks weird or your software crashes, you don't have to figure it out alone. You reach out to us, and we patiently help you fix it. Your success is our personal mission." },
-  { question: "Is it really just $49 USD? What's the catch?", answer: "No catch. We keep pricing low so more creators can upgrade fast without breaking the bank. It's a one-time payment of $49 USD for lifetime access to all 12 courses, free software links, and 24/7 team support." },
+  { question: "Is it really 100% free? What's the catch?", answer: "No catch! We've made the entire 12-course bundle free to support creators, students, and architects worldwide. Simply enter your name and email to receive full access links in your inbox." },
   { question: "Do I need to buy expensive software subscriptions?", answer: "Not at all. We will show you exactly how to easily access official free or student versions of all software. We want you earning safely, not spending thousands on expensive licenses." },
-  { question: "What if I feel like it's not working for me?", answer: "We want this to be 100% risk-free. If you join and feel it's not a fit, email us within 7 days and we will refund your $49 immediately, no questions asked." },
+  { question: "What if I feel like it's not working for me?", answer: "Access is completely free and lifetime, so you can explore and learn at your own pace without any financial risk." },
   { question: "Can I access the training on my mobile and laptop?", answer: "Yes! All courses are hosted online and work perfectly on any device — laptop, desktop, tablet, or phone. You can learn comfortably at your own pace anywhere." },
 ];
 

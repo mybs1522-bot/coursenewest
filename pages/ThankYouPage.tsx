@@ -1,17 +1,44 @@
-import React, { useEffect } from 'react';
-import { CheckCircle2, Globe, ExternalLink, MessageCircle, ArrowRight, Sparkles, BookOpen } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { trackPurchase, trackCompleteRegistration } from '../services/metaPixel';
+import React, { useEffect, useState } from 'react';
+import { CheckCircle2, Globe, ExternalLink, MessageCircle, ArrowRight, Sparkles, BookOpen, Mail } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { trackCompleteRegistration } from '../services/metaPixel';
 
 const ThankYouPage: React.FC = () => {
-  const DRIVE_LINK = 'https://drive.google.com/drive/folders/1CCyv9u82HiYI8jnyULISfBoGMcbcqd9U?usp=drive_link';
+  const [searchParams] = useSearchParams();
+  const [studentName, setStudentName] = useState('');
+  const [studentEmail, setStudentEmail] = useState('');
+
+  const DRIVE_LINK = (
+    import.meta.env.VITE_COURSE_ACCESS_LINK ||
+    'https://files.leadsdocker.com'
+  ).trim();
+
   const WHATSAPP_NUMBER = '+91 91987 47810';
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    trackPurchase({ value: 49, currency: 'USD', content_name: 'Avada 12-Course Architecture & Design Bundle' });
     trackCompleteRegistration({ status: true });
-  }, []);
+
+    // Retrieve name and email from URL or session storage
+    const queryName = searchParams.get('name');
+    const queryEmail = searchParams.get('email');
+
+    if (queryName || queryEmail) {
+      if (queryName) setStudentName(queryName);
+      if (queryEmail) setStudentEmail(queryEmail);
+    } else {
+      const stored = sessionStorage.getItem('enrolled_student');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.name) setStudentName(parsed.name);
+          if (parsed.email) setStudentEmail(parsed.email);
+        } catch (e) {
+          // ignore
+        }
+      }
+    }
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900 selection:bg-emerald-100">
@@ -44,11 +71,18 @@ const ThankYouPage: React.FC = () => {
             </div>
             
             <h1 className="text-3xl md:text-4xl font-display font-black tracking-tight mb-4">
-              Welcome to the family!
+              Welcome to the family{studentName ? `, ${studentName}` : ''}! 🎉
             </h1>
-            <p className="text-gray-500 font-medium text-lg mb-10 leading-relaxed">
-              Your payment was successful. Your journey to mastering design through our curated courses collection starts now!
+            <p className="text-gray-500 font-medium text-lg mb-8 leading-relaxed">
+              Your free enrollment is confirmed. Your journey to mastering architecture and interior design starts right now!
             </p>
+
+            {studentEmail && (
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-700 text-sm font-medium mb-8">
+                <Mail size={16} />
+                <span>Access link sent to: <strong>{studentEmail}</strong></span>
+              </div>
+            )}
 
             <div className="space-y-4">
               <a 
@@ -57,12 +91,12 @@ const ThankYouPage: React.FC = () => {
                 rel="noopener noreferrer"
                 className="group w-full py-5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white rounded-2xl font-black text-xl shadow-xl shadow-emerald-500/30 transition-all duration-300 flex items-center justify-center gap-3"
               >
-                <span>Access Course Collection</span>
+                <span>Open Course Collection Directly</span>
                 <ArrowRight className="group-hover:translate-x-1 transition-transform" size={24} />
               </a>
               
               <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">
-                Instant Access • One-time Purchase
+                100% Free Lifetime Access • Instant Download
               </p>
             </div>
           </div>
@@ -75,7 +109,7 @@ const ThankYouPage: React.FC = () => {
               </div>
               <h3 className="font-bold text-lg mb-2">Check Your Email</h3>
               <p className="text-gray-500 text-sm leading-relaxed">
-                We've sent a confirmation email with the access link to your inbox for safe keeping.
+                We've delivered an email with your access links and resources. If you don't see it, check your spam or promotions tab.
               </p>
             </div>
 
@@ -85,7 +119,7 @@ const ThankYouPage: React.FC = () => {
               </div>
               <h3 className="font-bold text-lg mb-2">WhatsApp Support</h3>
               <p className="text-gray-500 text-sm leading-relaxed">
-                Need help with your access? Reach out to us anytime via WhatsApp: <span className="font-bold text-gray-900">{WHATSAPP_NUMBER}</span>
+                Need help with your software setup or files? Reach out to us anytime via WhatsApp: <span className="font-bold text-gray-900">{WHATSAPP_NUMBER}</span>
               </p>
             </div>
           </div>

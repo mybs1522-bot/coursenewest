@@ -4,7 +4,7 @@ import { COURSES, COURSE_CATEGORIES, BUNDLE_PRICE, TESTIMONIALS, FAQ_ITEMS } fro
 import { ChevronDown, Sparkles, ArrowRight, Timer, Star, CheckCircle2, Zap, Download, Eye } from 'lucide-react';
 import { CourseDetailModal } from '../components/CourseDetailModal';
 import { TextMarquee } from '../components/ui/text-marquee';
-import { PaymentModal } from '../components/PaymentModal';
+import { FreeAccessModal } from '../components/FreeAccessModal';
 import { trackViewContent, trackInitiateCheckout } from '../services/metaPixel';
 
 // Logo Component
@@ -19,7 +19,7 @@ const Logo = () => (
       <span className="text-[7px] font-bold uppercase tracking-widest text-gray-400 flex justify-between w-full leading-none">
         <span>DESIGN</span>
         <span>•</span>
-        <span className="text-brand-primary font-black">${BUNDLE_PRICE}</span>
+        <span className="text-emerald-600 font-black">FREE</span>
       </span>
     </div>
   </div>
@@ -164,7 +164,7 @@ const CheckoutPage: React.FC = () => {
         <div className="container mx-auto flex items-center justify-center gap-4 sm:gap-8 text-sm">
           <div className="flex items-center gap-2 shrink-0">
             <Zap size={14} className="text-yellow-400 fill-yellow-400" />
-            <span className="text-xs sm:text-sm font-bold">Global lifetime bundle now <span className="text-brand-accent">${BUNDLE_PRICE} USD</span></span>
+            <span className="text-xs sm:text-sm font-bold">Global lifetime bundle now <span className="text-emerald-400 font-bold">100% FREE</span></span>
           </div>
           <div className="w-px h-4 bg-gray-700 hidden sm:block"></div>
           <div className="flex items-center gap-2 shrink-0">
@@ -186,10 +186,10 @@ const CheckoutPage: React.FC = () => {
           <Logo />
           <button
             onClick={openPayment}
-            className="flex items-center gap-2 bg-gray-900 text-white font-bold text-xs px-5 py-2.5 rounded-full hover:bg-black transition-colors"
+            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-2.5 rounded-full transition-colors shadow-sm"
           >
-            <Download size={14} className="text-yellow-400" />
-            <span className="hidden sm:inline">Unlock Global Bundle —</span> ${BUNDLE_PRICE}
+            <Download size={14} />
+            <span className="hidden sm:inline">Unlock Global Bundle —</span> FREE
           </button>
         </div>
       </nav>
@@ -307,13 +307,13 @@ const CheckoutPage: React.FC = () => {
             </div>
             <button
               onClick={openPayment}
-              className="mt-6 md:mt-8 inline-flex items-center gap-1.5 md:gap-3 px-5 md:px-10 py-3.5 md:py-5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl md:rounded-2xl font-bold text-[13px] md:text-lg shadow-xl shadow-blue-500/30 hover:shadow-blue-500/40 hover:scale-[1.02] transition-all group w-full sm:w-auto justify-center animate-shimmer border border-blue-400/50"
+              className="mt-6 md:mt-8 inline-flex items-center gap-1.5 md:gap-3 px-5 md:px-10 py-3.5 md:py-5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-xl md:rounded-2xl font-bold text-[13px] md:text-lg shadow-xl shadow-emerald-500/30 hover:scale-[1.02] transition-all group w-full sm:w-auto justify-center border border-emerald-400/50"
             >
               <Download size={16} className="md:w-5 md:h-5 shrink-0" />
-              <span className="whitespace-nowrap">Instant Access for ${BUNDLE_PRICE} USD</span>
+              <span className="whitespace-nowrap">Get 100% Free Instant Access</span>
               <ArrowRight size={16} className="md:w-[18px] md:h-[18px] group-hover:translate-x-1 transition-transform shrink-0" />
             </button>
-            <p className="mt-4 text-xs md:text-sm text-gray-900 font-black max-w-[280px] md:max-w-none mx-auto leading-relaxed bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 inline-block">Lifetime access • All software included free • 7-Day Refund Policy</p>
+            <p className="mt-4 text-xs md:text-sm text-gray-900 font-black max-w-[280px] md:max-w-none mx-auto leading-relaxed bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 inline-block">Lifetime access • All software included free • Instant Email Delivery</p>
           </div>
         </section>
 
@@ -353,18 +353,18 @@ const CheckoutPage: React.FC = () => {
                     Best Value Deal
                   </div>
                   <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-3">
-                    All {COURSES.length} Courses <span className="text-brand-accent">${BUNDLE_PRICE} USD</span>
+                    All {COURSES.length} Courses <span className="text-emerald-400">100% FREE</span>
                   </h2>
                   <p className="text-gray-900 font-black text-sm bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 inline-block mt-1">
-                    Lifetime access to every course. Free software included. 7-Day Refund Policy.
+                    Lifetime access to every course. Free software included. Instant email delivery.
                   </p>
                 </div>
                 <button
                   onClick={openPayment}
-                  className="px-5 py-4 md:px-10 md:py-5 bg-brand-primary text-white font-bold text-sm md:text-lg rounded-xl md:rounded-2xl shadow-glow hover:shadow-glow-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2 md:gap-3 group shrink-0 w-full sm:w-auto animate-shimmer border border-blue-400/30"
+                  className="px-5 py-4 md:px-10 md:py-5 bg-emerald-600 text-white font-bold text-sm md:text-lg rounded-xl md:rounded-2xl shadow-lg hover:bg-emerald-500 transition-all flex items-center justify-center gap-2 md:gap-3 group shrink-0 w-full sm:w-auto border border-emerald-400/30"
                 >
                   <Download size={16} className="md:w-5 md:h-5 shrink-0" />
-                  <span className="whitespace-nowrap">Grab Instant Access Now</span>
+                  <span className="whitespace-nowrap">Grab Free Instant Access</span>
                   <ArrowRight size={16} className="md:w-5 md:h-5 group-hover:translate-x-1 transition-transform shrink-0" />
                 </button>
               </div>
@@ -449,16 +449,16 @@ const CheckoutPage: React.FC = () => {
             </div>
             <div className="flex items-center gap-3">
               <div className="text-right hidden sm:block">
-                <div className="text-[10px] text-gray-400 uppercase tracking-widest leading-tight">Bundle Price</div>
-                <div className="text-lg font-display font-bold text-white leading-tight">${BUNDLE_PRICE}</div>
+                <div className="text-[10px] text-gray-400 uppercase tracking-widest leading-tight">Bundle Access</div>
+                <div className="text-lg font-display font-bold text-emerald-400 leading-tight">FREE</div>
               </div>
               <button
                 onClick={openPayment}
-                className="bg-brand-primary hover:bg-blue-700 text-white font-bold px-5 py-2 rounded-lg flex items-center gap-1.5 transition-all shadow-glow hover:shadow-glow-lg text-sm"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2 rounded-lg flex items-center gap-1.5 transition-all shadow-md text-sm"
               >
-                <span className="sm:hidden font-display text-base">${BUNDLE_PRICE}</span>
+                <span className="sm:hidden font-display text-base">FREE</span>
                 <Download size={14} />
-                <span>Get Instant Access</span>
+                <span>Get Free Access</span>
                 <ArrowRight size={14} />
               </button>
             </div>
@@ -466,7 +466,7 @@ const CheckoutPage: React.FC = () => {
         </div>
       </div>
 
-      <PaymentModal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} />
+      <FreeAccessModal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} />
 
       {/* ═══════ COURSE DETAIL MODAL ═══════ */}
       <CourseDetailModal

@@ -1,11 +1,11 @@
 // @ts-nocheck
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || 're_R1jB8rP4_HDCbfxGVfXpUiaYECp3dELhC';
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || '';
 const PAYPAL_CLIENT_ID = Deno.env.get('PAYPAL_CLIENT_ID') || '';
 const PAYPAL_CLIENT_SECRET = Deno.env.get('PAYPAL_CLIENT_SECRET') || '';
 const FROM_EMAIL = 'AVADA Courses <noreply@avada.in>';
-const DRIVE_LINK = 'https://drive.google.com/drive/folders/1CCyv9u82HiYI8jnyULISfBoGMcbcqd9U?usp=drive_link';
+const DRIVE_LINK = Deno.env.get('COURSE_ACCESS_LINK') || 'https://files.leadsdocker.com';
 const WHATSAPP_NUMBER = '+91 91987 47810';
 
 const corsHeaders = {

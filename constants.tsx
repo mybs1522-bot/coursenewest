@@ -249,7 +249,7 @@ export const COURSE_CATEGORIES = [
   }
 ];
 
-export const BUNDLE_PRICE = 49;
+export const BUNDLE_PRICE = 0;
 export const BUNDLE_ORIGINAL_PRICE = 199;
 
 export const TESTIMONIALS: Testimonial[] = [
@@ -257,7 +257,7 @@ export const TESTIMONIALS: Testimonial[] = [
     name: 'Ethan Brooks',
     role: 'Senior Architect',
     location: 'Austin, USA',
-    content: 'The Revit workflow section alone saved our firm countless hours. The value at $49 is unreal.'
+    content: 'The Revit workflow section alone saved our firm countless hours. Getting all these courses for free is an incredible resource.'
   },
   {
     name: 'Sophia Nguyen',
@@ -281,7 +281,7 @@ export const TESTIMONIALS: Testimonial[] = [
     name: 'Olivia Martin',
     role: 'Interior Designer',
     location: 'Sydney, Australia',
-    content: 'I can now present 10 variations to clients in the time it used to take for one. Best $49 I ever spent.'
+    content: 'I can now present 10 variations to clients in the time it used to take for one. The most valuable design training available.'
   },
   {
     name: 'Liam Ortega',
@@ -293,12 +293,12 @@ export const TESTIMONIALS: Testimonial[] = [
 
 export const FAQ_ITEMS: FaqItem[] = [
   {
-    question: "How do I access the courses after buying?",
-    answer: "You'll receive instant access via email with download links and login credentials within 5 minutes of payment."
+    question: "How do I access the courses?",
+    answer: "Enter your name and email in the free access form. You'll receive instant access links directly in your inbox."
   },
   {
-    question: "Can I buy individual courses or only the bundle?",
-    answer: "The bundle is the best value: get all 12 courses for a one-time $49 USD with lifetime access."
+    question: "Are these courses really 100% free?",
+    answer: "Yes! You get complete lifetime access to all 12 courses, asset packs, and tutorial files at zero cost."
   },
   {
     question: "Are project files included?",
@@ -309,7 +309,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     answer: "Yes, industry-recognized certificates are provided upon course completion."
   },
   {
-    question: "Is there a refund policy?",
-    answer: "Yes, 100% money-back refund policy within 7 days if you're not satisfied. No questions asked."
+    question: "What software do I need?",
+    answer: "Tutorials cover standard industry tools including AutoCAD, SketchUp, Revit, 3ds Max, V-Ray, and Lumion. Free links and trial setup guides are provided."
   }
-];
+];

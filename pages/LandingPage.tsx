@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Star, CheckCircle, CheckCircle2, X, ChevronDown, Sparkles, Download, ShieldCheck, Zap, Users } from 'lucide-react';
 import {
-  CallToActionWidget, SocialProofToast,
+  CallToActionWidget, SocialProofToast, InlineSectionCta,
+  CORE_MASTERCLASSES, TRANSFORMATION_COMPARISON,
   PROBLEM_POINTS, TRANSFORMATION_STORIES, FEAR_STATS,
   VALUE_STACK_ITEMS, TESTIMONIALS_LANDING, FAQ_ITEMS_LANDING,
   COURSES_LANDING, PAGE_PREVIEWS_ROW1, PAGE_PREVIEWS_ROW2,
   DESIGN_MENTORS
 } from './LandingHelpers';
 import { trackViewContent, trackInitiateCheckout } from '../services/metaPixel';
-import { redirectToStripeCheckout } from '../services/stripeCheckout';
+import { FreeAccessModal } from '../components/FreeAccessModal';
 
 const LandingPage: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState(() => {
@@ -17,6 +18,7 @@ const LandingPage: React.FC = () => {
   });
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [showFreeAccessModal, setShowFreeAccessModal] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -40,7 +42,8 @@ const LandingPage: React.FC = () => {
   }, []);
 
   const openCheckout = () => {
-    redirectToStripeCheckout();
+    trackInitiateCheckout();
+    setShowFreeAccessModal(true);
   };
   const formatTime = (v: number) => v.toString().padStart(2, '0');
 
@@ -103,7 +106,7 @@ const LandingPage: React.FC = () => {
 
             <div className="flex items-center gap-3 mb-1">
               <span className="text-zinc-400 line-through text-base sm:text-lg font-medium">$199</span>
-              <span className="text-3xl sm:text-4xl font-black text-black tracking-tight">$49 USD</span>
+              <span className="text-3xl sm:text-4xl font-black text-emerald-600 tracking-tight">100% FREE</span>
             </div>
 
             <button
@@ -111,12 +114,12 @@ const LandingPage: React.FC = () => {
               className="w-full sm:w-auto px-10 md:px-14 py-4 md:py-4.5 bg-black hover:bg-zinc-800 text-white rounded-2xl font-black text-base md:text-lg border-2 border-[#00D66F] shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all inline-flex items-center justify-center gap-3 cursor-pointer"
             >
               <Download size={19} className="shrink-0 text-[#00D66F]" />
-              <span>Get All 12 Courses</span>
+              <span>Get Free Instant Access</span>
               <ArrowRight size={19} className="text-[#00D66F]" />
             </button>
 
             <p className="text-xs text-zinc-500 font-medium mt-1">
-              Instant Download • 24/7 Mentor Support • 7-Day 100% Money-Back Guarantee
+              Instant Email Access • 24/7 Mentor Support • All 12 Courses & Software Links
             </p>
 
             {/* Bonus Banner */}
@@ -139,6 +142,92 @@ const LandingPage: React.FC = () => {
             />
           </div>
         </section>
+
+        {/* ═══ FRIENDLY EDUCATOR INTRODUCTION & WHAT YOU WALK AWAY WITH ═══ */}
+        <section className="max-w-4xl mx-auto px-4 sm:px-6 my-10">
+          <div className="bg-white border border-zinc-200 rounded-3xl p-6 sm:p-10 shadow-xs relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 pb-6 border-b border-zinc-100">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center text-3xl font-bold shrink-0">
+                👋
+              </div>
+              <div>
+                <div className="inline-flex items-center gap-2 px-2.5 py-0.5 bg-zinc-100 rounded-full text-zinc-700 text-[10px] font-bold uppercase tracking-wider mb-1">
+                  <span>Your Mentors On This Journey</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-display font-black text-black">
+                  Hey, I'm Mark Hathing & the Avada Team 👋
+                </h2>
+              </div>
+            </div>
+
+            <div className="space-y-3.5 text-zinc-700 text-sm sm:text-base leading-relaxed">
+              <p>
+                Let me be completely honest with you — <strong className="text-black font-semibold">you don't need any previous design experience</strong>. You don't need an architecture degree. You don't even need to know what AutoCAD or SketchUp look like right now.
+              </p>
+              <p>
+                All you need is a laptop (Windows or Mac) and the willingness to follow along. We designed this program so you can go from absolute zero to building client-ready 3D projects — <strong className="text-black font-semibold">in 15 days or less</strong>.
+              </p>
+              <p className="text-zinc-600 italic">
+                Here is exactly what you walk away with when you join us today:
+              </p>
+            </div>
+
+            {/* What You Walk Away With Box */}
+            <div className="mt-8 pt-6 border-t border-zinc-100">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="flex items-start gap-3 bg-zinc-50 border border-zinc-200/80 rounded-2xl p-4">
+                  <div className="w-7 h-7 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</div>
+                  <p className="text-xs sm:text-sm text-zinc-700 leading-snug">
+                    <strong className="text-zinc-900 block mb-0.5">Draft real blueprints in AutoCAD:</strong> The same construction-ready permit plans architecture firms charge $500+ to produce.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3 bg-zinc-50 border border-zinc-200/80 rounded-2xl p-4">
+                  <div className="w-7 h-7 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</div>
+                  <p className="text-xs sm:text-sm text-zinc-700 leading-snug">
+                    <strong className="text-zinc-900 block mb-0.5">Model full 3D homes in SketchUp:</strong> Create stunning kitchens, living rooms, and villas that look like you've been doing this for years.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3 bg-zinc-50 border border-zinc-200/80 rounded-2xl p-4">
+                  <div className="w-7 h-7 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</div>
+                  <p className="text-xs sm:text-sm text-zinc-700 leading-snug">
+                    <strong className="text-zinc-900 block mb-0.5">Photorealistic renders in V-Ray & D5:</strong> The kind of magazine-grade imagery that makes clients say "shut up and take my money."
+                  </p>
+                </div>
+                <div className="flex items-start gap-3 bg-zinc-50 border border-zinc-200/80 rounded-2xl p-4">
+                  <div className="w-7 h-7 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">4</div>
+                  <p className="text-xs sm:text-sm text-zinc-700 leading-snug">
+                    <strong className="text-zinc-900 block mb-0.5">Generate AI concepts in 60 seconds:</strong> Use Midjourney and ControlNet while other designers are still sketching rough napkins by hand.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3 bg-zinc-50 border border-zinc-200/80 rounded-2xl p-4 sm:col-span-2">
+                  <div className="w-7 h-7 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">5</div>
+                  <p className="text-xs sm:text-sm text-zinc-700 leading-snug">
+                    <strong className="text-zinc-900 block mb-0.5">Live 3D walkthroughs on Zoom:</strong> Walk clients through rooms in real time and close projects worth $1,500–$5,000 with complete confidence.
+                  </p>
+                </div>
+              </div>
+
+              {/* Earnings & Inclusions Pill */}
+              <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="bg-emerald-50 border border-emerald-200/80 rounded-2xl p-3.5 text-emerald-950 font-medium">
+                  💰 <strong className="font-bold text-emerald-900">EARNINGS:</strong> $500–$2,000+ per project — we show you how to land your first freelance clients inside the program.
+                </div>
+                <div className="bg-zinc-100 border border-zinc-200 rounded-2xl p-3.5 text-zinc-800 font-medium">
+                  📦 <strong className="font-bold text-zinc-900">INCLUDED:</strong> Software links, 10,000+ textures, 2,000+ 3D models, verified certificates & 24/7 team support.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ CTA #1: GET FREE ACCESS ═══ */}
+        <InlineSectionCta
+          badgeText="100% Free Lifetime Access"
+          headline="Take Your First Step Into High-Demand 3D Design"
+          subtext="Join 50,000+ creators who upgraded their skills without spending thousands on degrees or software. Enter your details for instant access."
+          onClick={openCheckout}
+          buttonText="Get Free Access"
+        />
 
         {/* ═══ 3. ALL 12 SOFTWARE CAROUSEL ═══ */}
         <section className="max-w-5xl mx-auto px-4 sm:px-6 my-12 overflow-hidden text-center">
@@ -224,6 +313,68 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
         </section>
+
+        {/* ═══ DETAILED CURRICULUM BREAKDOWN (5 CORE MASTERCLASSES) ═══ */}
+        <section className="max-w-5xl mx-auto px-4 sm:px-6 my-14">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-zinc-100 border border-zinc-200 text-zinc-800 text-xs font-bold uppercase tracking-wider rounded-full mb-3">
+              <span>Curriculum Breakdown</span>
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-display font-black text-black tracking-tight mb-2">
+              Inside The 5 Core Masterclasses
+            </h2>
+            <p className="text-xs sm:text-sm text-zinc-500 font-normal max-w-xl mx-auto">
+              Every tool selected to give you an unfair advantage in freelance design, architecture studios, and client presentations.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {CORE_MASTERCLASSES.map((course, idx) => (
+              <div 
+                key={idx} 
+                className="bg-white border border-zinc-200 rounded-3xl p-6 shadow-xs flex flex-col justify-between hover:border-zinc-400 transition-all hover:shadow-md"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-wider">
+                      {course.number} • {course.software}
+                    </span>
+                    <span className="text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">
+                      {course.students}
+                    </span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-display font-bold text-black mb-2 leading-snug">
+                    {course.title}
+                  </h3>
+                  <p className="text-xs text-zinc-600 mb-4 leading-relaxed">
+                    {course.description}
+                  </p>
+                  <div className="space-y-2 mb-5">
+                    {course.points.map((pt, pIdx) => (
+                      <div key={pIdx} className="flex items-start gap-2 text-xs text-zinc-700">
+                        <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                        <span className="leading-snug">{pt}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="pt-3.5 border-t border-zinc-100 bg-zinc-50/80 -mx-6 -mb-6 p-4 rounded-b-3xl">
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold mb-0.5">Workflow Impact</p>
+                  <p className="text-xs font-semibold text-zinc-900 leading-snug">{course.impact}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ═══ CTA #2: GET FREE ACCESS ═══ */}
+        <InlineSectionCta
+          badgeText="Zero Cost • Instant Delivery"
+          headline="Master The End-to-End Architectural Pipeline"
+          subtext="Stop piecing together disconnected YouTube tutorials. Get complete lifetime access to all 5 masterclasses, project source files, and download links."
+          onClick={openCheckout}
+          buttonText="Get Free Access"
+        />
 
         {/* ═══ 4. WHY 50,000+ STUDENTS CHOOSE AVADA ═══ */}
         <section className="max-w-5xl mx-auto px-4 sm:px-6 my-14">
@@ -338,6 +489,15 @@ const LandingPage: React.FC = () => {
           </div>
         </section>
 
+        {/* ═══ CTA #3: GET FREE ACCESS ═══ */}
+        <InlineSectionCta
+          badgeText="Transform Your Portfolio"
+          headline="Create Photorealistic Renders In 15 Days"
+          subtext="Get instant access to 10,000+ PBR textures, 2,000+ 3D models, and the exact step-by-step rendering formula used by top visualization artists."
+          onClick={openCheckout}
+          buttonText="Get Free Access"
+        />
+
         {/* ═══ 6. THE AI REALITY CHECK ═══ */}
         <section className="max-w-5xl mx-auto px-4 sm:px-6 my-14">
           <div className="bg-black text-white rounded-3xl p-6 sm:p-10 text-center shadow-xl border border-zinc-800">
@@ -381,65 +541,102 @@ const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        {/* ═══ 8. THE FRUSTRATING PATH vs. OUR SYSTEM ═══ */}
+
+        {/* ═══ 8. THE COMPLETE SHIFT: WITHOUT THIS WORKFLOW vs. WITH THE SYSTEM ═══ */}
         <section className="max-w-5xl mx-auto px-4 sm:px-6 my-14">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl font-display font-black text-black tracking-tight mb-1">
-              Traditional Learning vs. The Avada Accelerated System
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-zinc-100 border border-zinc-200 text-zinc-800 text-xs font-bold uppercase tracking-wider rounded-full mb-3">
+              <span>The Complete Shift</span>
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-display font-black text-black tracking-tight mb-2">
+              Why Freelancers & Studios Switch to This Pipeline
             </h2>
+            <p className="text-xs sm:text-sm text-zinc-500 font-normal max-w-xl mx-auto">
+              Mastering these tools transforms not just your 3D design skills, but your earning power.
+            </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="bg-zinc-50 border border-zinc-200 rounded-3xl p-6 text-left">
-              <h3 className="font-bold text-zinc-900 text-base mb-4 flex items-center gap-2">
-                <X size={18} className="text-zinc-400" /> The Frustrating Path
-              </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+            {/* Without this workflow */}
+            <div className="bg-zinc-50 border border-zinc-200 rounded-3xl p-6 sm:p-8 text-left">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-xs shrink-0">✕</div>
+                <h3 className="font-bold text-zinc-900 text-base sm:text-lg">
+                  {TRANSFORMATION_COMPARISON.without.title}
+                </h3>
+              </div>
+              <p className="text-xs text-zinc-500 font-medium mb-5">{TRANSFORMATION_COMPARISON.without.subtitle}</p>
               <ul className="text-xs sm:text-sm text-zinc-600 space-y-3">
-                {PROBLEM_POINTS.map((s, t) => (
-                  <li key={t} className="flex items-start gap-2">
-                    <span className="text-zinc-400 shrink-0 font-mono">—</span>
-                    <span>{s.text}</span>
+                {TRANSFORMATION_COMPARISON.without.points.map((pt, pIdx) => (
+                  <li key={pIdx} className="flex items-start gap-2.5">
+                    <span className="text-red-400 shrink-0 font-bold">✕</span>
+                    <span className="leading-snug">{pt}</span>
                   </li>
                 ))}
-                <li className="flex items-start gap-2">
-                  <span className="text-zinc-400 shrink-0 font-mono">—</span>
-                  <span>Piecing together disconnected YouTube tutorials with no clear structure</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-zinc-400 shrink-0 font-mono">—</span>
-                  <span>Paying expensive monthly software licenses before earning any client income</span>
-                </li>
               </ul>
             </div>
 
-            <div className="bg-black text-white border border-zinc-800 rounded-3xl p-6 text-left shadow-lg">
-              <h3 className="font-bold text-white text-base mb-4 flex items-center gap-2">
-                <CheckCircle2 size={18} className="text-white" /> The Avada Accelerated System
-              </h3>
-              <ul className="text-xs sm:text-sm text-zinc-300 space-y-3 font-normal">
-                <li className="flex items-start gap-2">
-                  <CheckCircle size={15} className="text-white shrink-0 mt-0.5" />
-                  <span>Structured workflow: AutoCAD → Revit → SketchUp → V-Ray → AI</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle size={15} className="text-white shrink-0 mt-0.5" />
-                  <span>3 real paid freelance projects provided upon completion ($300 value)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle size={15} className="text-white shrink-0 mt-0.5" />
-                  <span>Verified free/student software edition links — zero expensive overhead</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle size={15} className="text-white shrink-0 mt-0.5" />
-                  <span>24/7 technical team assistance whenever you encounter software roadblocks</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle size={15} className="text-white shrink-0 mt-0.5" />
-                  <span>A high-end, client-ready architectural portfolio built in 15 days</span>
-                </li>
-              </ul>
+            {/* With the system */}
+            <div className="bg-zinc-950 text-white border border-zinc-800 rounded-3xl p-6 sm:p-8 text-left shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded-full bg-emerald-500 text-black flex items-center justify-center font-bold text-xs shrink-0">✓</div>
+                  <h3 className="font-bold text-white text-base sm:text-lg">
+                    {TRANSFORMATION_COMPARISON.withSystem.title}
+                  </h3>
+                </div>
+                <p className="text-xs text-emerald-400 font-medium mb-5">{TRANSFORMATION_COMPARISON.withSystem.subtitle}</p>
+                <ul className="text-xs sm:text-sm text-zinc-300 space-y-3 font-normal">
+                  {TRANSFORMATION_COMPARISON.withSystem.points.map((pt, pIdx) => (
+                    <li key={pIdx} className="flex items-start gap-2.5">
+                      <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                      <span className="leading-snug">{pt}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* From Learning to Earning Bar */}
+          <div className="bg-white border border-zinc-200 rounded-2xl p-5 text-center shadow-xs">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 font-bold block mb-3">
+              TRANSFORMATION • FROM LEARNING TO EARNING
+            </span>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
+              <div className="bg-zinc-50 p-3 rounded-xl border border-zinc-100">
+                <span className="text-zinc-400 block text-[10px]">Step 1</span>
+                <span className="font-bold text-zinc-900">Confusion → Clarity</span>
+              </div>
+              <div className="bg-zinc-50 p-3 rounded-xl border border-zinc-100">
+                <span className="text-zinc-400 block text-[10px]">Step 2</span>
+                <span className="font-bold text-zinc-900">2D Plans → 3D Visuals</span>
+              </div>
+              <div className="bg-zinc-50 p-3 rounded-xl border border-zinc-100">
+                <span className="text-zinc-400 block text-[10px]">Step 3</span>
+                <span className="font-bold text-zinc-900">Tutorials → Real Skills</span>
+              </div>
+              <div className="bg-zinc-50 p-3 rounded-xl border border-zinc-100">
+                <span className="text-zinc-400 block text-[10px]">Step 4</span>
+                <span className="font-bold text-zinc-900">Basics → Client Ready</span>
+              </div>
+              <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-100 col-span-2 sm:col-span-1">
+                <span className="text-emerald-600 block text-[10px]">Result</span>
+                <span className="font-bold text-emerald-950">Earn Via Design</span>
+              </div>
             </div>
           </div>
         </section>
+
+        {/* ═══ CTA #4: GET FREE ACCESS ═══ */}
+        <InlineSectionCta
+          badgeText="Join 50,000+ Enrolled Learners"
+          headline="Claim Your Unfair Advantage In Architecture & Design"
+          subtext="No degree required. No expensive software subscriptions. Learn the complete AutoCAD, SketchUp, V-Ray, D5 & AI workflow 100% free."
+          onClick={openCheckout}
+          buttonText="Get Free Access"
+        />
 
         {/* ═══ 9. WHAT'S INCLUDED ═══ */}
         <section className="max-w-5xl mx-auto px-4 sm:px-6 my-14">
@@ -470,7 +667,7 @@ const LandingPage: React.FC = () => {
                 onClick={openCheckout}
                 className="w-full py-4 bg-black hover:bg-zinc-800 active:scale-[0.99] text-white rounded-2xl font-black text-base uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer border-2 border-[#00D66F]"
               >
-                <span>Unlock All 12 Courses & Software Links ($49)</span>
+                <span>Unlock All 12 Courses & Software Links (100% Free)</span>
                 <ArrowRight size={18} className="text-[#00D66F]" />
               </button>
             </div>
@@ -637,18 +834,23 @@ const LandingPage: React.FC = () => {
               Offer Ends In {formatTime(timeLeft.h)}:{formatTime(timeLeft.m)}:{formatTime(timeLeft.s)}
             </span>
             <span className="text-xs sm:text-sm font-bold text-white">
-              All 12 Courses & Software Links ($49 USD)
+              All 12 Courses & Software Links (100% Free)
             </span>
           </div>
           <button
             onClick={openCheckout}
             className="bg-black hover:bg-zinc-900 text-white border-2 border-[#00D66F] px-5 py-2 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
           >
-            <span>Get Access</span>
+            <span>Get Free Access</span>
             <ArrowRight size={15} className="text-[#00D66F]" />
           </button>
         </div>
       </div>
+
+      <FreeAccessModal 
+        isOpen={showFreeAccessModal} 
+        onClose={() => setShowFreeAccessModal(false)} 
+      />
 
       <SocialProofToast />
     </div>
