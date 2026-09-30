@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
     const studentName = (name || '').trim() || 'Creator';
     const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
-    const FROM_EMAIL = process.env.FROM_EMAIL || 'Avada Courses <onboarding@resend.dev>';
+    const FROM_EMAIL = process.env.FROM_EMAIL || 'Avada Courses <support@avada.space>';
     const DRIVE_LINK = process.env.COURSE_ACCESS_LINK || 'https://files.leadsdocker.com';
     const WHATSAPP_NUMBER = '+91 91987 47810';
 
@@ -81,38 +81,36 @@ export default async function handler(req, res) {
 </html>
     `;
 
-    if (!RESEND_API_KEY) {
-      console.warn('[Resend API] No RESEND_API_KEY configured. Mocking successful delivery for development.');
-      return res.status(200).json({
-        success: true,
-        simulated: true,
-        message: 'Resend API key not configured yet. Lead recorded successfully (simulated email delivery).',
-        recipient: email,
-        studentName,
-        courseLink: DRIVE_LINK
-      });
+    let resendRes;
+    let data;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        resendRes = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: FROM_EMAIL,
+            to: email,
+            subject: `Your Free Course Access Link 🚀 — Avada Architecture & Design`,
+            html,
+          }),
+        });
+
+        data = await resendRes.json();
+        if (resendRes.ok) break;
+      } catch (networkErr) {
+        if (attempt === 2) throw networkErr;
+        await new Promise((r) => setTimeout(r, 600));
+      }
     }
 
-    const resendRes = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: FROM_EMAIL,
-        to: email,
-        subject: `Your Free Course Access Link 🚀 — Avada Architecture & Design`,
-        html,
-      }),
-    });
-
-    const data = await resendRes.json();
-
-    if (!resendRes.ok) {
+    if (!resendRes || !resendRes.ok) {
       console.error('[Resend Error]', data);
-      return res.status(resendRes.status).json({
-        error: data.message || 'Failed to send email via Resend',
+      return res.status(resendRes ? resendRes.status : 500).json({
+        error: (data && data.message) || 'Failed to send email via Resend',
         details: data
       });
     }

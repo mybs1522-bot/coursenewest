@@ -26,7 +26,7 @@ export const FreeAccessModal: React.FC<FreeAccessModalProps> = ({ isOpen, onClos
     e.preventDefault();
     setErrorMessage(null);
 
-    const isNameValid = name.trim().length >= 2;
+    const isNameValid = name.trim().length >= 1;
     const isEmailValid = validateEmail(email.trim());
 
     setNameError(!isNameValid);
@@ -39,20 +39,32 @@ export const FreeAccessModal: React.FC<FreeAccessModalProps> = ({ isOpen, onClos
     setIsLoading(true);
 
     try {
-      // 1. Send access email via backend endpoint
-      const response = await fetch('/api/send-access', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim().toLowerCase(),
-        }),
-      });
+      // 1. Send access email via backend endpoint with automatic retry
+      let response: Response | null = null;
+      let data: any = null;
+      let lastErr: any = null;
 
-      const data = await response.json();
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          response = await fetch('/api/send-access', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: name.trim(),
+              email: email.trim().toLowerCase(),
+            }),
+          });
+          data = await response.json();
+          if (response.ok) break;
+        } catch (fetchErr) {
+          lastErr = fetchErr;
+          if (attempt === 2) break;
+          await new Promise((r) => setTimeout(r, 600));
+        }
+      }
 
-      if (!response.ok && !data.simulated) {
-        throw new Error(data.error || 'Failed to submit form. Please try again.');
+      if (!response || !response.ok) {
+        throw new Error((data && data.error) || (lastErr && lastErr.message) || 'Failed to submit form. Please try again.');
       }
 
       // 2. Track Meta pixel events

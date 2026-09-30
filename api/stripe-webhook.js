@@ -1,5 +1,5 @@
 const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
-const FROM_EMAIL = process.env.FROM_EMAIL || 'Avada Design <access@avada.space>';
+const FROM_EMAIL = process.env.FROM_EMAIL || 'Avada Courses <support@avada.space>';
 const DRIVE_LINK = process.env.COURSE_ACCESS_LINK || 'https://files.leadsdocker.com';
 
 export default async function handler(req, res) {

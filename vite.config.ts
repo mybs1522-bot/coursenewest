@@ -3,15 +3,12 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
 function sendAccessPlugin(env: Record<string, string>) {
-  return {
-    name: 'send-access-api-plugin',
-    configureServer(server: any) {
-      server.middlewares.use(async (req: any, res: any, next: any) => {
-        if (req.url === '/api/send-access' && req.method === 'POST') {
-          let bodyStr = '';
-          req.on('data', (chunk: any) => {
-            bodyStr += chunk;
-          });
+  const handler = async (req: any, res: any, next: any) => {
+    if (req.url === '/api/send-access' && req.method === 'POST') {
+      let bodyStr = '';
+      req.on('data', (chunk: any) => {
+        bodyStr += chunk;
+      });
           req.on('end', async () => {
             try {
               const body = bodyStr ? JSON.parse(bodyStr) : {};
@@ -25,28 +22,9 @@ function sendAccessPlugin(env: Record<string, string>) {
 
               const studentName = (name || '').trim() || 'Creator';
               const RESEND_API_KEY = env.RESEND_API_KEY || process.env.RESEND_API_KEY || '';
-              const FROM_EMAIL = env.FROM_EMAIL || process.env.FROM_EMAIL || 'Avada Courses <onboarding@resend.dev>';
+              const FROM_EMAIL = env.FROM_EMAIL || process.env.FROM_EMAIL || 'Avada Courses <support@avada.space>';
               const DRIVE_LINK = env.COURSE_ACCESS_LINK || process.env.COURSE_ACCESS_LINK || 'https://files.leadsdocker.com';
               const WHATSAPP_NUMBER = '+91 91987 47810';
-
-              if (!RESEND_API_KEY) {
-                console.log('\n[Dev Server] Simulated Course Access Email Sent:');
-                console.log(`- To: ${email} (${studentName})`);
-                console.log(`- Course Link: ${DRIVE_LINK}`);
-                console.log('- Note: Set RESEND_API_KEY in .env to deliver live emails via Resend.\n');
-
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({
-                  success: true,
-                  simulated: true,
-                  message: 'Simulated email sent in dev mode. Set RESEND_API_KEY in .env to send live emails.',
-                  recipient: email,
-                  studentName,
-                  courseLink: DRIVE_LINK
-                }));
-                return;
-              }
 
               const html = `
 <!DOCTYPE html>
@@ -94,26 +72,37 @@ function sendAccessPlugin(env: Record<string, string>) {
 </body>
 </html>`;
 
-              const resendRes = await fetch('https://api.resend.com/emails', {
-                method: 'POST',
-                headers: {
-                  'Authorization': `Bearer ${RESEND_API_KEY}`,
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  from: FROM_EMAIL,
-                  to: email,
-                  subject: 'Your Free Course Access Link 🚀 — Avada Architecture & Design',
-                  html,
-                }),
-              });
+              let resendRes: any;
+              let data: any;
+              for (let attempt = 1; attempt <= 2; attempt++) {
+                try {
+                  resendRes = await fetch('https://api.resend.com/emails', {
+                    method: 'POST',
+                    headers: {
+                      'Authorization': `Bearer ${RESEND_API_KEY}`,
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      from: FROM_EMAIL,
+                      to: email,
+                      subject: 'Your Free Course Access Link 🚀 — Avada Architecture & Design',
+                      html,
+                    }),
+                  });
 
-              const data = await resendRes.json();
-              res.statusCode = resendRes.status;
+                  data = await resendRes.json();
+                  if (resendRes.ok) break;
+                } catch (networkErr) {
+                  if (attempt === 2) throw networkErr;
+                  await new Promise((r) => setTimeout(r, 600));
+                }
+              }
+
+              res.statusCode = resendRes ? resendRes.status : 500;
               res.setHeader('Content-Type', 'application/json');
               res.end(JSON.stringify({
-                success: resendRes.ok,
-                emailId: data.id,
+                success: resendRes ? resendRes.ok : false,
+                emailId: data ? data.id : null,
                 details: data
               }));
             } catch (err: any) {
@@ -125,8 +114,16 @@ function sendAccessPlugin(env: Record<string, string>) {
           return;
         }
         next();
-      });
-    }
+  };
+
+  return {
+    name: 'send-access-api-plugin',
+    configureServer(server: any) {
+      server.middlewares.use(handler);
+    },
+    configurePreviewServer(server: any) {
+      server.middlewares.use(handler);
+    },
   };
 }
 
@@ -134,6 +131,10 @@ export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
     return {
       server: {
+        port: 4000,
+        host: '0.0.0.0',
+      },
+      preview: {
         port: 4000,
         host: '0.0.0.0',
       },
